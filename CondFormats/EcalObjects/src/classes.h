@@ -65,6 +65,9 @@
 #include "CondFormats/EcalObjects/interface/EcalTPGSpike.h"
 #include "CondFormats/EcalObjects/interface/EcalSRSettings.h"
 #include "CondFormats/EcalObjects/interface/EcalSimPulseShape.h"
+//ECAL PH2:
+ #include "CondFormats/EcalObjects/interface/EcalLiteDTUPedestals.h"
+ #include "CondFormats/EcalObjects/interface/EcalCATIAGainRatios.h"
 
 namespace CondFormats_EcalObjects {
   struct dictionary {
@@ -93,6 +96,11 @@ namespace CondFormats_EcalObjects {
     EcalContainer<EEDetId,EcalPedestal> ec_eeDetId_ecalPedestal;
     EcalContainer<EBDetId,EcalPedestal> ec_ebDetId_ecalPedestal;
     EcalCondObjectContainer<EcalPedestal> pedmap; //typedef EcalPedestals
+
+    //ECAL PH2:
+    std::vector<EcalLiteDTUPed> v_ecalDTUPed;
+    EcalContainer<EBDetId,EcalLiteDTUPed> ec_ebDetId_ecalLiteDTUPed;
+    EcalCondObjectContainer<EcalLiteDTUPed> pedmapDTU; //typedef EcalPedestals
 
     std::vector<EcalTPGCrystalStatusCode> v_ecalTPGCrystalStatusCode;
     EcalContainer<EEDetId,EcalTPGCrystalStatusCode> ec_eeDetId_ecalTPGCrystalStatusCode;
