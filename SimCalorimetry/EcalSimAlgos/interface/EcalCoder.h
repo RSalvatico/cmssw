@@ -1,4 +1,3 @@
-
 #ifndef EcalSimAlgos_EcalCoder_h
 #define EcalSimAlgos_EcalCoder_h 1
 
@@ -26,6 +25,7 @@ namespace CLHEP {
  */
 class EcalCoder {
 public:
+
   typedef CaloTSamples<float, 10> EcalSamples;
 
   typedef CorrelatedNoisifier<EcalCorrMatrix> Noisifier;

@@ -470,8 +470,9 @@ void CTPPSDirectProtonSimulation::processProton(
                 << " mm, y = " << h_loc.y() << " mm, z = " << h_loc.z() << " mm" << std::endl;
         }
 
-        bool module3By2 = (geometry.getSensor(detIdInt)->sensorType() != DDD_CTPPS_PIXELS_SENSOR_TYPE_2x2);
-        if (checkIsHit_ && !CTPPSPixelTopology::isPixelHit(h_loc.x(), h_loc.y(), module3By2))
+        //bool module3By2 = (geometry.getSensor(detIdInt)->sensorType() != DDD_CTPPS_PIXELS_SENSOR_TYPE_2x2);
+        //if (checkIsHit_ && !CTPPSPixelTopology::isPixelHit(h_loc.x(), h_loc.y(), module3By2))
+          if (checkIsHit_ && !CTPPSPixelTopology::isPixelHit(h_loc.x(), h_loc.y()))
           continue;
 
         if (roundToPitch_) {
