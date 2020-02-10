@@ -42,7 +42,6 @@
 #include "SimCalorimetry/EcalSimAlgos/interface/ESDigitizer.h"
 #include "SimDataFormats/CaloHit/interface/PCaloHit.h"
 #include "SimGeneral/MixingModule/interface/PileUpEventPrincipal.h"
-
 #include "CondFormats/DataRecord/interface/ESGainRcd.h"
 #include "CondFormats/DataRecord/interface/ESIntercalibConstantsRcd.h"
 #include "CondFormats/DataRecord/interface/ESMIPToGeVConstantRcd.h"
