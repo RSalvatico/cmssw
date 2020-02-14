@@ -7,7 +7,7 @@ import FWCore.ParameterSet.Config as cms
 
 from Configuration.StandardSequences.Eras import eras
 
-process = cms.Process('DIGI')#,eras.phase2_common)
+process = cms.Process('DIGI',eras.phase2_common)
 
 # import of standard configurations
 process.load('Configuration.StandardSequences.Services_cff')
@@ -25,7 +25,7 @@ process.load('IOMC.EventVertexGenerators.VtxSmearedRealistic50ns13TeVCollision_c
 process.load('Calibration.EcalCalibAlgos.ecalPedestalPCLHarvester_cfi')
 process.load('GeneratorInterface.Core.genFilterSummary_cff')
 process.load('Configuration.StandardSequences.SimIdeal_cff')
-process.load('Configuration.StandardSequences.Digi_cff')
+process.load('Configuration.StandardSequences.Digi_Ph2_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 

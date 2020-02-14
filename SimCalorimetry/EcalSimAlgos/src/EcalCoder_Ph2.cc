@@ -35,8 +35,7 @@ EcalCoder_Ph2::~EcalCoder_Ph2()
 }
 
 void 
-EcalCoder_Ph2::setFullScaleEnergy( double EBscale ,
-                               double EEscale   )
+EcalCoder_Ph2::setFullScaleEnergy( double EBscale )
 {
   //   m_maxEneEB = EBscale ;
   m_maxEneEB = 2000. ; //I don 't know where is setFullScaleEnergy first call

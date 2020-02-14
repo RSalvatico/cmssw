@@ -52,8 +52,7 @@ class EcalCoder_Ph2 {
 
       void setGainRatios( const EcalCATIAGainRatios* gainRatios ) ;
 
-      void setFullScaleEnergy( double EBscale ,
-			       double EEscale   ) ;
+      void setFullScaleEnergy( double EBscale   ) ;
 
       void setIntercalibConstants( const EcalIntercalibConstantsMC* ical ) ; 
  
