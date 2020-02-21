@@ -1,5 +1,5 @@
 import FWCore.ParameterSet.Config as cms
-
+print "[SimCalorimetry_Ph2_cff.py] Including SimCalorimetry.Configuration.ecalDigiSequence_Ph2_cff"
 from SimCalorimetry.Configuration.ecalDigiSequence_Ph2_cff import *
 from SimCalorimetry.Configuration.hcalDigiSequence_cff import *
 from SimCalorimetry.Configuration.castorDigiSequence_cff import *

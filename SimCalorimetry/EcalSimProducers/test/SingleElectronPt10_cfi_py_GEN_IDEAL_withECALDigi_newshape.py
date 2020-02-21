@@ -7,7 +7,7 @@ import FWCore.ParameterSet.Config as cms
 
 from Configuration.StandardSequences.Eras import eras
 
-process = cms.Process('DIGI',eras.phase2_common)
+process = cms.Process('DIGI')#,eras.phase2_common)
 
 # import of standard configurations
 process.load('Configuration.StandardSequences.Services_cff')
@@ -108,8 +108,9 @@ process.RECOSIMoutput_step = cms.EndPath(process.RECOSIMoutput)
 
 
 
-
+#CondCore.CondDB.CondDB_cfi
 from CondCore.DBCommon.CondDBSetup_cfi import *
+#from CondCore.CondDB.CondDB_cfi import *
 process.ecalConditions = cms.ESSource("PoolDBESSource", CondDBSetup,
       #connect = cms.string('frontier://FrontierProd/CMS_COND_31X_ECAL'),
       #connect = cms.string('oracle://cms_orcoff_prep/CMS_COND_ECAL'),

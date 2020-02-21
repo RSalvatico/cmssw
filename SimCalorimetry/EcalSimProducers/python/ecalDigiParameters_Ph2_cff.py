@@ -1,5 +1,5 @@
 import FWCore.ParameterSet.Config as cms
-
+print "[ecalDigiParameters_Ph2_cff] has the ecal_digi_parameters"
 ecal_digi_parameters = cms.PSet(
     EBdigiCollection = cms.string(''),
     UseLCcorrection  = cms.untracked.bool(True),

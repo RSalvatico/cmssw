@@ -1,5 +1,5 @@
 import FWCore.ParameterSet.Config as cms
-
+print "[ecalDigiSequence_Ph2_cff.py] SimCalorimetry.EcalSimProducers.ecaldigi_Ph2_cfi"
 # unsuppressed digis simulation - fast preshower
 from SimCalorimetry.EcalSimProducers.ecaldigi_Ph2_cfi import *
 # ECAL Trigger Primitives (needed by SRP)

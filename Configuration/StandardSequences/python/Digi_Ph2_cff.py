@@ -14,6 +14,7 @@ import FWCore.ParameterSet.Config as cms
 
 # Calorimetry Digis (Ecal + Hcal) - * unsuppressed *
 # returns sequence "calDigi"
+print "[Digi_Ph2] Includding SimCalorimetry.Configuration.SimCalorimetry_Ph2_cff"
 from SimCalorimetry.Configuration.SimCalorimetry_Ph2_cff import *
 # Muon Digis (CSC + DT + RPC)
 # returns sequence "muonDigi"

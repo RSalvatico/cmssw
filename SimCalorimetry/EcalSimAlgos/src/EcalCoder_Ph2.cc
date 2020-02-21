@@ -27,7 +27,7 @@ EcalCoder_Ph2::EcalCoder_Ph2( bool                  addNoise     ,
    m_ebCorrNoise[0] = ebCorrNoise0 ;
    assert( nullptr != m_ebCorrNoise[0] ) ;
    m_ebCorrNoise[1] = ebCorrNoise1 ;
-  
+   std::cout<<"I AM THE CODER PH2!!!!!!!!!!!!!"<<std::endl;
 }  
 
 EcalCoder_Ph2::~EcalCoder_Ph2()
