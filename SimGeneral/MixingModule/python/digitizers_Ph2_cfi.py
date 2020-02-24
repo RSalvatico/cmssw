@@ -4,14 +4,14 @@ import FWCore.ParameterSet.Config as cms
 from SimGeneral.MixingModule.aliases_cfi import *
 from SimGeneral.MixingModule.pixelDigitizer_cfi import *
 from SimGeneral.MixingModule.stripDigitizer_cfi import *
-from SimGeneral.MixingModule.ecalDigitizer_cfi import *
+from SimGeneral.MixingModule.ecalDigitizer_Ph2_cfi import *
 from SimGeneral.MixingModule.hcalDigitizer_cfi import *
 from SimGeneral.MixingModule.castorDigitizer_cfi import *
 from SimGeneral.MixingModule.pileupVtxDigitizer_cfi import *
 from SimGeneral.MixingModule.trackingTruthProducerSelection_cfi import *
 from SimGeneral.MixingModule.caloTruthProducer_cfi import *
 from FastSimulation.Tracking.recoTrackAccumulator_cfi import *
-print "digitizer_cfi????"
+print "digitizer_cfi_Ph2"
 theDigitizers = cms.PSet(
   pixel = cms.PSet(
     pixelDigitizer
@@ -20,7 +20,7 @@ theDigitizers = cms.PSet(
     stripDigitizer
   ),
   ecal = cms.PSet(
-    ecalDigitizer
+    ecalDigitizer_Ph2
   ),
   hcal = cms.PSet(
     hcalDigitizer

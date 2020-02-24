@@ -13,7 +13,7 @@ print "ecal_digi_parameters,"
 print "apd_sim_parameters"
 print "ecal_electronics_sim,"
 print "ecal_cosmics_sim,"
-print "ecal_sim_parameter_map,"
+print "ecal_sim_parameter_map_ph2,"
 print "ecal_notCont_sim,"
 print "hitsProducer = cms.string(\'g4SimHits\'),"
 print "accumulatorType = cms.string(\"EcalDigiProducer_Ph2\"),"
@@ -24,7 +24,7 @@ ecalDigitizer_Ph2 = cms.PSet(
     apd_sim_parameters,
     ecal_electronics_sim,
     ecal_cosmics_sim,
-    ecal_sim_parameter_map,
+    ecal_sim_parameter_map_ph2,
     ecal_notCont_sim,
     hitsProducer = cms.string('g4SimHits'),
     accumulatorType = cms.string("EcalDigiProducer_Ph2"),

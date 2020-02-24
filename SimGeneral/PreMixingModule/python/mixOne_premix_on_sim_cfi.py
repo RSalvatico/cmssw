@@ -14,7 +14,7 @@ from SimTracker.SiPhase2Digitizer.phase2TrackerDigitizer_cfi import phase2Tracke
 from SimGeneral.MixingModule.ecalDigitizer_cfi import ecalDigitizer
 from SimCalorimetry.HGCalSimProducers.hgcalDigitizer_cfi import hgceeDigitizer, hgchebackDigitizer, hgchefrontDigitizer, hfnoseDigitizer
 from SimFastTiming.FastTimingCommon.mtdDigitizer_cfi import mtdDigitizer
-
+print "mixOne_premix_on_sim_cfi???"
 hcalSimBlock.HcalPreMixStage2 = cms.bool(True)
 
 mixData = cms.EDProducer("PreMixingModule",

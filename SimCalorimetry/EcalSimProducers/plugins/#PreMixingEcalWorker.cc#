@@ -85,7 +85,6 @@ PreMixingEcalWorker::PreMixingEcalWorker(const edm::ParameterSet &ps,
   myEcalDigitizer_.setEBNoiseSignalGenerator(&theEBSignalGenerator);
   myEcalDigitizer_.setEENoiseSignalGenerator(&theEESignalGenerator);
   myEcalDigitizer_.setESNoiseSignalGenerator(&theESSignalGenerator);
-  std::cout<<"I am in Premix Ecal Worker.cc"<<std::endl;
 }
 
 void PreMixingEcalWorker::initializeEvent(const edm::Event &e, const edm::EventSetup &ES) {
