@@ -124,7 +124,7 @@ EcalDigiProducer_Ph2::EcalDigiProducer_Ph2( const edm::ParameterSet& params,  ed
    m_APDElectronicsSim ( nullptr ) ,
    m_APDCoder          ( nullptr ) ,
    m_Geometry          ( nullptr ) ,
-   m_EBCorrNoise       ( { {nullptr, nullptr, nullptr} } )
+   m_EBCorrNoise       ( { {nullptr, nullptr} } )
 
 {
   std::cout<<"[EcalDigiProducer_Ph2] Constructing producer"<<     "frameSize: " <<  m_readoutFrameSize<< std::endl;
@@ -150,7 +150,7 @@ EcalDigiProducer_Ph2::EcalDigiProducer_Ph2( const edm::ParameterSet& params,  ed
 
    }
 
-   EcalCorrMatrix ebMatrix[ 3 ] ;
+   EcalCorrMatrix_Ph2 ebMatrix[ 2 ] ;
 
 
    std::cout<<"[EcalDigiProducer_Ph2] Check size10: "<<ebCorMatG10Ph2.size()<<std::endl;
@@ -173,7 +173,9 @@ EcalDigiProducer_Ph2::EcalDigiProducer_Ph2( const edm::ParameterSet& params,  ed
       for ( unsigned int column ( 0 ) ; column <= row ; ++column )
       {
 	 const unsigned int index ( row - column ) ;
-
+	 std::cout<<"index: "<<index<<std::endl;
+	 std::cout<<"ebCorMat10: "<<ebCorMatG10Ph2[ index ] <<std::endl;
+	 std::cout<<"ebCorMat01: "<<ebCorMatG01Ph2[ index ] <<std::endl;
 	 ebMatrix[0]( row, column ) = ebCorMatG10Ph2[ index ] ;
 	  std::cout<<"col mat0: "<<column<<std::endl;
 	 ebMatrix[1]( row, column ) = ebCorMatG01Ph2[ index ] ;
@@ -181,8 +183,8 @@ EcalDigiProducer_Ph2::EcalDigiProducer_Ph2( const edm::ParameterSet& params,  ed
       }
    }
     std::cout<<"[EcalDigiProducer_Ph2] Reset"<<std::endl;
-   m_EBCorrNoise[0].reset( new CorrelatedNoisifier<EcalCorrMatrix>( ebMatrix[0] ) );
-   m_EBCorrNoise[1].reset( new CorrelatedNoisifier<EcalCorrMatrix>( ebMatrix[1] ) );
+   m_EBCorrNoise[0].reset( new CorrelatedNoisifier<EcalCorrMatrix_Ph2>( ebMatrix[0] ) );
+   m_EBCorrNoise[1].reset( new CorrelatedNoisifier<EcalCorrMatrix_Ph2>( ebMatrix[1] ) );
 
 
     std::cout<<"[EcalDigiProducer_Ph2] More reset"<<std::endl;

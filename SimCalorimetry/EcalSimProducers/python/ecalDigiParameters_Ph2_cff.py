@@ -1,9 +1,9 @@
 import FWCore.ParameterSet.Config as cms
 print "[ecalDIgiParaleters_Ph2_cff] I am using digi parameters ph2, in which i have correlation matrices"
 ecal_digi_parameters = cms.PSet(
-    EEdigiCollection = cms.string(''),
+#    EEdigiCollection = cms.string(''),
     EBdigiCollection = cms.string(''),
-    ESdigiCollection = cms.string(''),
+ #   ESdigiCollection = cms.string(''),
     UseLCcorrection  = cms.untracked.bool(True),
 
     EBCorrNoiseMatrixG12 = cms.vdouble (
@@ -39,16 +39,6 @@ ecal_digi_parameters = cms.PSet(
     EBCorrNoiseMatrixG01Ph2 = cms.vdouble (
     1.00000, 0.73354, 0.64442, 0.58851, 0.55425,
     0.53082, 0.51916, 0.51097, 0.50732, 0.50409, 0.40449,0.40449,0.40449,0.40449,0.40449,0.40449) ,
-
-
-    EECorrNoiseMatrixG10Ph2 = cms.vdouble (
-    1.00000, 0.71073, 0.55721, 0.46089, 0.40449,
-    0.35931, 0.33924, 0.32439, 0.31581, 0.30481, 0.40449,0.40449,0.40449,0.40449,0.40449,0.40449) ,
-
-    EECorrNoiseMatrixG01Ph2 = cms.vdouble (
-    1.00000, 0.73354, 0.64442, 0.58851, 0.55425,
-    0.53082, 0.51916, 0.51097, 0.50732, 0.50409, 0.40449,0.40449,0.40449,0.40449,0.40449,0.40449) ,
-
 
     EcalPreMixStage1 = cms.bool(False),
     EcalPreMixStage2 = cms.bool(False)

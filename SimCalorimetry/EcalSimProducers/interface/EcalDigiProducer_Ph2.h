@@ -5,7 +5,7 @@
 #include "SimCalorimetry/EcalSimAlgos/interface/EBShape.h"
 #include "DataFormats/Math/interface/Error.h"
 #include "SimGeneral/NoiseGenerators/interface/CorrelatedNoisifier.h"
-#include "SimCalorimetry/EcalSimAlgos/interface/EcalCorrelatedNoiseMatrix.h"
+#include "SimCalorimetry/EcalSimAlgos/interface/EcalCorrelatedNoiseMatrix_Ph2.h"
 
 #include "SimCalorimetry/CaloSimAlgos/interface/CaloTDigitizer.h"
 #include "SimCalorimetry/EcalSimAlgos/interface/EcalTDigitizer_Ph2.h"
@@ -114,7 +114,7 @@ class EcalDigiProducer_Ph2 : public DigiAccumulatorMixMod {
 
       const CaloGeometry*   m_Geometry ;
 
-      std::array< std::unique_ptr<CorrelatedNoisifier<EcalCorrMatrix> >, 3 > m_EBCorrNoise ;
+      std::array< std::unique_ptr<CorrelatedNoisifier<EcalCorrMatrix_Ph2> >, 2 > m_EBCorrNoise ;
 
       CLHEP::HepRandomEngine* randomEngine_ = nullptr;
 };

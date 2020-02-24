@@ -1,5 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 print "loading mix simcastor digi"
+print "In aliases_cfi many modifications without duplicate it"
 simCastorDigis = cms.EDAlias(
     mix = cms.VPSet(
       cms.PSet(type = cms.string('CastorDataFramesSorted'))
@@ -9,8 +10,8 @@ print "loading mix simEcalUnsuppressedDigi"
 simEcalUnsuppressedDigis = cms.EDAlias(
     mix = cms.VPSet(
       cms.PSet(type = cms.string('EBDigiCollection')),
-      cms.PSet(type = cms.string('EEDigiCollection')),
-      cms.PSet(type = cms.string('ESDigiCollection'))
+#      cms.PSet(type = cms.string('EEDigiCollection')),
+#      cms.PSet(type = cms.string('ESDigiCollection'))
     )
 )
 print "loading mix simHcalUnsuppressedDigi"

@@ -6,7 +6,7 @@
 #include "CondFormats/EcalObjects/interface/EcalLiteDTUPedestals.h"
 #include "CondFormats/EcalObjects/interface/EcalIntercalibConstantsMC.h"
 #include "CondFormats/EcalObjects/interface/EcalCATIAGainRatios.h"
-#include "SimCalorimetry/EcalSimAlgos/interface/EcalCorrelatedNoiseMatrix.h"
+#include "SimCalorimetry/EcalSimAlgos/interface/EcalCorrelatedNoiseMatrix_Ph2.h"
 #include "CondFormats/EcalObjects/interface/EcalConstants.h"
 
 
@@ -31,7 +31,7 @@ class EcalCoder_Ph2 {
 
       //typedef CaloTSamples_Ph2<float,10> EcalSamples ;
       
-      typedef CorrelatedNoisifier<EcalCorrMatrix> Noisifier ;
+      typedef CorrelatedNoisifier<EcalCorrMatrix_Ph2> Noisifier ;
 
       enum { NBITS         =   12 , // number of available bits
              MAXADC        = 4095,  // 2^12 -1,  adc max range
