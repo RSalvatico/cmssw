@@ -26,7 +26,7 @@ class EcalCoder_Ph2 ;
 class EcalElectronicsSim_Ph2 ;
 class EcalBaseSignalGenerator;
 class CaloGeometry ;
-class EBDigiCollection ;
+class EBDigiCollectionPh2 ;
 class PileUpEventPrincipal ;
 
 namespace edm {
@@ -61,7 +61,7 @@ class EcalDigiProducer_Ph2 : public DigiAccumulatorMixMod {
 
    private:
 
-      virtual void cacheEBDigis( const EBDigiCollection* ebDigiPtr ) const { }
+      virtual void cacheEBDigis( const EBDigiCollectionPh2* ebDigiPtr ) const { }
 
       typedef edm::Handle<std::vector<PCaloHit> > HitsHandle;
       void accumulateCaloHits(HitsHandle const& ebHandle, int bunchCrossing);

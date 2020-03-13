@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 print "[ecalDIgiParaleters_Ph2_cff] I am using digi parameters ph2, in which i have correlation matrices"
 ecal_digi_parameters = cms.PSet(
 #    EEdigiCollection = cms.string(''),
-    EBdigiCollection = cms.string(''),
+    EBdigiCollectionPh2 = cms.string(''),
  #   ESdigiCollection = cms.string(''),
     UseLCcorrection  = cms.untracked.bool(True),
 

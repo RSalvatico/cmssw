@@ -7,7 +7,7 @@ import FWCore.ParameterSet.Config as cms
 
 from Configuration.StandardSequences.Eras import eras
 
-process = cms.Process('DIGI')#,eras.phase2_common)
+process = cms.Process('DIGI',eras.phase2_common)
 
 # import of standard configurations
 process.load('Configuration.StandardSequences.Services_cff')
@@ -37,8 +37,9 @@ process.maxEvents = cms.untracked.PSet(
 process.source = cms.Source("EmptySource")
 
 process.options = cms.untracked.PSet(
-
+        SkipEvent = cms.untracked.vstring('ProductNotFound')
 )
+
 
 # Production Info
 process.configurationMetadata = cms.untracked.PSet(
@@ -54,8 +55,8 @@ process.RECOSIMoutput = cms.OutputModule("PoolOutputModule",
         SelectEvents = cms.vstring('generation_step')
     ),
     dataset = cms.untracked.PSet(
-        dataTier = cms.untracked.string('GEN-SIM-RAW'),
-        filterName = cms.untracked.string('')
+            dataTier = cms.untracked.string('GEN-SIM-RAW'),
+            filterName = cms.untracked.string('')            
     ),
     fileName = cms.untracked.string('SingleElectronPt10_pythia8_cfi_py_GEN_SIM_DIGI_Pt10.root'),
 #    outputCommands = process.RECOSIMEventContent.outputCommands,

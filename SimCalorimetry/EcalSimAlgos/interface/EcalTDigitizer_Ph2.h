@@ -23,10 +23,10 @@ template< class Traits >
 class EcalTDigitizer_Ph2
 {
    public:
-  typedef typename Traits::ElectronicsSim_Ph2 ElectronicsSim_Ph2 ;
-      typedef typename Traits::Digi           Digi           ;
-      typedef typename Traits::DigiCollection DigiCollection ;
-      typedef typename Traits::EcalSamples    EcalSamples    ;
+  typedef typename Traits::ElectronicsSim_Ph2     ElectronicsSim_Ph2 ;
+      typedef typename Traits::Digi               Digi           ;
+      typedef typename Traits::DigiCollection     DigiCollection ;
+      typedef typename Traits::EcalSamples        EcalSamples    ;
 
       EcalTDigitizer_Ph2< Traits >( EcalHitResponse_Ph2* hitResponse    ,
 				ElectronicsSim_Ph2*  electronicsSim ,

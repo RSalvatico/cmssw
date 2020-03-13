@@ -4,7 +4,7 @@
 #include "SimCalorimetry/CaloSimAlgos/interface/CaloHitResponse.h"
 #include "SimCalorimetry/EcalSimAlgos/interface/EcalSimParameterMap_Ph2.h"
 #include "SimCalorimetry/EcalSimAlgos/interface/APDSimParameters.h"
-#include "DataFormats/EcalDigi/interface/EcalDigiCollections.h"
+#include "DataFormats/EcalDigi/interface/EcalDigiCollections_Ph2.h"
 #include "SimCalorimetry/EcalSimAlgos/interface/EcalCoder_Ph2.h"
 #include "SimCalorimetry/EcalSimAlgos/interface/EcalElectronicsSim_Ph2.h"
 #include "Geometry/CaloGeometry/interface/CaloGeometry.h"
@@ -52,9 +52,9 @@
 EcalDigiProducer_Ph2::EcalDigiProducer_Ph2( const edm::ParameterSet& params, edm::ProducerBase& mixMod, edm::ConsumesCollector& iC) :
   EcalDigiProducer_Ph2(params, iC)
 {
-   if(m_apdSeparateDigi) mixMod.produces<EBDigiCollection>(m_apdDigiTag);
+   if(m_apdSeparateDigi) mixMod.produces<EBDigiCollectionPh2>(m_apdDigiTag);
      
-   mixMod.produces<EBDigiCollection>(m_EBdigiCollection);
+   mixMod.produces<EBDigiCollectionPh2>(m_EBdigiCollection);
 
 }
 
@@ -64,7 +64,7 @@ EcalDigiProducer_Ph2::EcalDigiProducer_Ph2( const edm::ParameterSet& params,  ed
    m_APDShape         ( true ) ,
    m_EBShape          ( true ) ,
 
-   m_EBdigiCollection ( params.getParameter<std::string>("EBdigiCollection") ) ,
+   m_EBdigiCollection ( params.getParameter<std::string>("EBdigiCollectionPh2") ) ,
 
    m_hitsProducerTag  ( params.getParameter<std::string>("hitsProducer"    ) ) ,
    m_useLCcorrection  ( params.getUntrackedParameter<bool>("UseLCcorrection") ) ,
@@ -284,9 +284,9 @@ EcalDigiProducer_Ph2::accumulate(PileUpEventPrincipal const& e, edm::EventSetup 
 void 
 EcalDigiProducer_Ph2::finalizeEvent(edm::Event& event, edm::EventSetup const& eventSetup) {
    // Step B: Create empty output
-   std::unique_ptr<EBDigiCollection> apdResult      ( !m_apdSeparateDigi || !m_doEB ? nullptr :
-						    new EBDigiCollection() ) ;
-   std::unique_ptr<EBDigiCollection> barrelResult   ( new EBDigiCollection() ) ;
+   std::unique_ptr<EBDigiCollectionPh2> apdResult      ( !m_apdSeparateDigi || !m_doEB ? nullptr :
+						    new EBDigiCollectionPh2() ) ;
+   std::unique_ptr<EBDigiCollectionPh2> barrelResult   ( new EBDigiCollectionPh2() ) ;
    
    // run the algorithm
 

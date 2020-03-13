@@ -1,7 +1,7 @@
 #ifndef EcalSimAlgos_EcalDigitizerTraits_Ph2_h
 #define EcalSimAlgos_EcalDigitizerTraits_Ph2_h
 
-#include "DataFormats/EcalDigi/interface/EcalDigiCollections.h"
+#include "DataFormats/EcalDigi/interface/EcalDigiCollections_Ph2.h"
 #include "SimCalorimetry/EcalSimAlgos/interface/EcalElectronicsSim_Ph2.h"
 #include "CalibFormats/CaloObjects/interface/CaloTSamples_Ph2.h"
 #include "DataFormats/EcalDigi/interface/EcalDataFrame.h"
@@ -12,7 +12,7 @@ class EcalHitResponse ;
 class EBDigitizerTraits_Ph2 {
    public:
       /// the digis collection
-      typedef EBDigiCollection DigiCollection;
+  typedef EBDigiCollectionPh2 DigiCollection;
       /// the dataframes
       typedef EBDataFrame Digi;
       /// the electronics simulation
