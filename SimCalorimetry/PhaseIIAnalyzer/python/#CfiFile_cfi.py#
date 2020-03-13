@@ -1,0 +1,6 @@
+qimport FWCore.ParameterSet.Config as cms
+
+phaseII = cms.EDAnalyzer('PhaseIIAnalyzer',
+                         BarrelDigis=cms.InputTag('simEcalUnsuppressedDigis','ebDigis','DIGI'),
+                         record = cms.string('EcalLiteDTUPedestalsRcd')
+)
