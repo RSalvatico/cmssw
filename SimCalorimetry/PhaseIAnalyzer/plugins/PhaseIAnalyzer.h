@@ -16,10 +16,10 @@ using namespace std;
 // class declaration
 //
 
-class PhaseIIAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
+class PhaseIAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
  public:
-  explicit PhaseIIAnalyzer(const edm::ParameterSet&);
-  ~PhaseIIAnalyzer();     
+  explicit PhaseIAnalyzer(const edm::ParameterSet&);
+  ~PhaseIAnalyzer();     
 
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
@@ -31,7 +31,7 @@ class PhaseIIAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResources>  
 
   edm::InputTag digiTagEB_;
   
-  edm::EDGetTokenT<EBDigiCollectionPh2> digiTokenEB_; 
+  edm::EDGetTokenT<EBDigiCollection> digiTokenEB_; 
   
 
   edm::InputTag hitTagEB_;

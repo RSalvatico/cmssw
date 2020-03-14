@@ -171,7 +171,10 @@ EcalCoder_Ph2::encode( const EcalSamples& ecalSamples ,
 	 isSaturated[igain] = true;
        }
        
-       if (isSaturated[0] && igain==0) break; // gain 0 (x10) channel is saturated, readout will use gain 1 (x1)
+       if (isSaturated[0] && igain==0) {
+	 std::cout<<"*********I am saturated!!!!!!!!!!!!!!!!"<<std::endl;
+	 break; // gain 0 (x10) channel is saturated, readout will use gain 1 (x10)
+       }
        else adctrace[i] = adc;
 
        if(ecalSamples[i]>0.)

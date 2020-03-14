@@ -1,9 +1,9 @@
 // -*- C++ -*-
 //
-// Package:    PhaseII/PhaseIIAnalyzer
-// Class:      PhaseIIAnalyzer
+// Package:    PhaseI/PhaseIAnalyzer
+// Class:      PhaseIAnalyzer
 // 
-/**\class PhaseIIAnalyzer PhaseIIAnalyzer.cc PhaseII/PhaseIIAnalyzer/plugins/PhaseIIAnalyzer.cc
+/**\class PhaseIAnalyzer PhaseIAnalyzer.cc PhaseI/PhaseIAnalyzer/plugins/PhaseIAnalyzer.cc
 
  Description: [one line class summary]
 
@@ -30,15 +30,13 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 //My includes
-#include "DataFormats/EcalDigi/interface/EcalDigiCollections_Ph2.h"
+#include "DataFormats/EcalDigi/interface/EcalDigiCollections.h"
 #include "CondFormats/EcalObjects/interface/EcalPedestals.h"
 #include "CondFormats/DataRecord/interface/EcalPedestalsRcd.h"
-#include "CondFormats/EcalObjects/interface/EcalLiteDTUPedestals.h"
-#include "CondFormats/DataRecord/interface/EcalLiteDTUPedestalsRcd.h"
 #include "CondFormats/DataRecord/interface/EcalIntercalibConstantsMCRcd.h"
 #include "CondFormats/EcalObjects/interface/EcalIntercalibConstantsMC.h"
 
-#include "PhaseIIAnalyzer.h"
+#include "PhaseIAnalyzer.h"
 
 #include "DataFormats/EcalDetId/interface/EBDetId.h"
 #include "DataFormats/EcalDetId/interface/EEDetId.h"
@@ -65,14 +63,14 @@ using namespace edm;
 //
 // constructors and destructor
 //
-PhaseIIAnalyzer::PhaseIIAnalyzer(const edm::ParameterSet& iConfig)
+PhaseIAnalyzer::PhaseIAnalyzer(const edm::ParameterSet& iConfig)
 {
 //now do what ever initialization is needed
 usesResource("TFileService");
 
  digiTagEB_= iConfig.getParameter<edm::InputTag>("BarrelDigis");
 
- digiTokenEB_ = consumes<EBDigiCollectionPh2>(digiTagEB_);
+ digiTokenEB_ = consumes<EBDigiCollection>(digiTagEB_);
  
  //Files:
  edm::Service<TFileService> fs;
@@ -95,7 +93,7 @@ usesResource("TFileService");
    meEBDigiMultiplicity_ = fs->make<TH1D>(histo, histo, 612, 0., 61200);
   
     
-   for (int i = 0; i < ecalPh2::sampleSize ; i++ ) {
+   for (int i = 0; i < ecalPh1::sampleSize ; i++ ) {
 
      sprintf (histo, "EcalDigiTask Barrel analog pulse %02d", i+1) ;
      meEBDigiADCAnalog_[i] = fs->make<TH1D>(histo, histo, 4000, 0., 400.);
@@ -123,7 +121,7 @@ usesResource("TFileService");
 }
   
 
-PhaseIIAnalyzer::~PhaseIIAnalyzer()
+PhaseIAnalyzer::~PhaseIAnalyzer()
 {
  
    // do anything here that needs to be done at desctruction time
@@ -138,12 +136,12 @@ PhaseIIAnalyzer::~PhaseIIAnalyzer()
 
 // ------------ method called for each event  ------------
 void
-PhaseIIAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+PhaseIAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
   
-  //LogInfo("PhaseII") << "new event ";
+  //LogInfo("PhaseI") << "new event ";
 
-   Handle<EBDigiCollectionPh2> pDigiEB;
+   Handle<EBDigiCollection> pDigiEB;
    iEvent.getByToken(digiTokenEB_,pDigiEB);
 
    // edm::ESHandle<EcalIntercalibConstantsMC> ical;
@@ -152,7 +150,7 @@ PhaseIIAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
    // EcalIntercalibConstantsMC::const_iterator itical = ical_map->getMap().find(2);
    // cout << "intercalib: " << (*itical) << endl;
 
-   const int MAXSAMPLES=ecalPh2::sampleSize; 
+   const int MAXSAMPLES=ecalPh1::sampleSize; 
 
    std::vector<double> ebAnalogSignal ;
    std::vector<double> ebADCCounts ;
@@ -180,31 +178,22 @@ PhaseIIAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   
    int nDigis=0;
 
-   for (EBDigiCollectionPh2::const_iterator pDigi=pDigiEB->begin(); pDigi!=pDigiEB->end(); ++pDigi) 
+   for (EBDigiCollection::const_iterator pDigi=pDigiEB->begin(); pDigi!=pDigiEB->end(); ++pDigi) 
     {
        EBDataFrame digi( *pDigi );
        int nrSamples = digi.size();
-       //cout<<"NSamples found: "<<nrSamples<<endl;
+       cout<<"NSamples found: "<<nrSamples<<endl;
        EBDetId ebid = digi.id () ;
-       //cout<<" Crystall ID "<<ebid<<endl;
-       nDigis++;//cout<<" nDigis aaaaaaa "<<nDigis<<endl;
+       cout<<" Crystall ID "<<ebid<<endl;
+       nDigis++;
+       cout<<" nDigis aaaaaaa "<<nDigis<<endl;
        if (meEBDigiOccupancy_) meEBDigiOccupancy_->Fill( ebid.iphi(), ebid.ieta() ); 
-
-       edm::ESHandle<EcalLiteDTUPedestals> peds;
-       iSetup.get<EcalLiteDTUPedestalsRcd>().get(peds);
-       const EcalLiteDTUPedestalsMap* DTUpeds_map = peds.product();
-       EcalLiteDTUPedestalsMap::const_iterator itped = DTUpeds_map->getMap().find(ebid);
-       
-       cout << "mean dei piedistalli: " << (*itped).mean(0) << "   rms: " << (*itped).rms(0) << endl;
 
        double Emax = 0. ;
        int Pmax = 0 ;
        double pedestalPreSample = 0.;
        double pedestalPreSampleAnalog = 0.;
        int countsAfterGainSwitch = -1;
-       double higherGain = 1.;
-       int higherGainSample = 0;
-
      
        for (int sample = 0 ; sample < nrSamples; ++sample) 
         {
@@ -214,7 +203,7 @@ PhaseIIAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
           ebADCGains[sample] = 0.;
         }
 
-      double  gainConv_[2]={10,1};
+       double  gainConv_[4]={0,12,6,1};
       // saturated channels
       double barrelADCtoGeV_ = 0.048; //GeV
 
@@ -268,20 +257,20 @@ PhaseIIAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 
 // ------------ method called once each job just before starting event loop  ------------
 void 
-PhaseIIAnalyzer::beginJob()
+PhaseIAnalyzer::beginJob()
 {
 }
 
 // ------------ method called once each job just after ending the event loop  ------------
 void 
-PhaseIIAnalyzer::endJob() 
+PhaseIAnalyzer::endJob() 
 {
 }
 
 
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
 void
-PhaseIIAnalyzer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+PhaseIAnalyzer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   //The following says we do not know what parameters are allowed so do no validation
   // Please change this to state exactly what you do use, even if it is no parameters
   edm::ParameterSetDescription desc;
@@ -290,4 +279,4 @@ PhaseIIAnalyzer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) 
 }
 
 //define this as a plug-in
-DEFINE_FWK_MODULE(PhaseIIAnalyzer);
+DEFINE_FWK_MODULE(PhaseIAnalyzer);

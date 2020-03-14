@@ -7,25 +7,22 @@ import FWCore.ParameterSet.Config as cms
 
 from Configuration.StandardSequences.Eras import eras
 
-process = cms.Process('DIGI',eras.phase2_common)
+process = cms.Process('DIGI')#,eras.phase2_common)
 
 # import of standard configurations
 process.load('Configuration.StandardSequences.Services_cff')
 process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
 process.load('FWCore.MessageService.MessageLogger_cfi')
-process.load('SimCalorimetry.EcalSimProducers.esCATIAGainProducer_cfi')
-process.load('SimCalorimetry.EcalSimProducers.esEcalLiteDTUPedestalsProducer_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
-process.load('SimGeneral.MixingModule.mixNoPU_Ph2_cfi')
+process.load('SimGeneral.MixingModule.mixNoPU_cfi')
 process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
 process.load('Configuration.Geometry.GeometrySimDB_cff')
 process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('Configuration.StandardSequences.Generator_cff')
 process.load('IOMC.EventVertexGenerators.VtxSmearedRealistic50ns13TeVCollision_cfi')
-process.load('Calibration.EcalCalibAlgos.ecalPedestalPCLHarvester_cfi')
 process.load('GeneratorInterface.Core.genFilterSummary_cff')
 process.load('Configuration.StandardSequences.SimIdeal_cff')
-process.load('Configuration.StandardSequences.Digi_Ph2_cff')
+process.load('Configuration.StandardSequences.Digi_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
@@ -58,7 +55,7 @@ process.RECOSIMoutput = cms.OutputModule("PoolOutputModule",
             dataTier = cms.untracked.string('GEN-SIM-RAW'),
             filterName = cms.untracked.string('')            
     ),
-    fileName = cms.untracked.string('SingleElectronPt10_pythia8_cfi_py_GEN_SIM_DIGI_Pt10.root'),
+    fileName = cms.untracked.string('SingleElectronPt10_pythia8_cfi_py_GEN_SIM_DIGI_Pt10_Ph1.root'),
 #    outputCommands = process.RECOSIMEventContent.outputCommands,
     outputCommands = cms.untracked.vstring('keep *',
                         'drop *_mix_*_*'),
@@ -109,33 +106,33 @@ process.RECOSIMoutput_step = cms.EndPath(process.RECOSIMoutput)
 
 
 
-#CondCore.CondDB.CondDB_cfi
-from CondCore.DBCommon.CondDBSetup_cfi import *
-#from CondCore.CondDB.CondDB_cfi import *
-process.ecalConditions = cms.ESSource("PoolDBESSource", CondDBSetup,
-      #connect = cms.string('frontier://FrontierProd/CMS_COND_31X_ECAL'),
-      #connect = cms.string('oracle://cms_orcoff_prep/CMS_COND_ECAL'),
-      #authpath = cms.string('/afs/cern.ch/cms/DB/conddb'),
-      connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dsoldi/work/CMS/CMSEcal_Phase2_Ultimate/CMSSW_10_6_1/src/SimCalorimetry/EcalSimProducers/test/simPulseShapePhaseII.db'),
-
-      toGet = cms.VPSet(         # overide Global Tag use EcalTBWeights_EBEE_offline
-                  cms.PSet(
-                      record = cms.string('EcalSimPulseShapeRcd') ,
-                      tag = cms.string('EcalSimPulseShape_default_mc')
-                  )
-              )
-)
-process.es_prefer_ecalPulseShape = cms.ESPrefer("PoolDBESSource","ecalConditions")
-
-process.EcalCATIAGainRatiosESProducer = cms.ESProducer(
-	"EcalCATIAGainRatiosESProducer",
-	ComponentName = cms.string('testGainProducer')
-)
-
-process.EcalLiteDTUPedestalsESProducer = cms.ESProducer(
-	"EcalLiteDTUPedestalsESProducer",
-	ComponentName = cms.string('testPedestalProducer')
-)
+##CondCore.CondDB.CondDB_cfi
+#from CondCore.DBCommon.CondDBSetup_cfi import *
+##from CondCore.CondDB.CondDB_cfi import *
+#process.ecalConditions = cms.ESSource("PoolDBESSource", CondDBSetup,
+#      connect = cms.string('frontier://FrontierProd/CMS_COND_31X_ECAL'),
+#      #connect = cms.string('oracle://cms_orcoff_prep/CMS_COND_ECAL'),
+#      #authpath = cms.string('/afs/cern.ch/cms/DB/conddb'),
+#     connect = cms.string('sqlite_file:/afs/cern.ch/user/d/dsoldi/work/CMS/CMSEcal_Phase2_Ultimate/CMSSW_10_6_1/src/SimCalorimetry/EcalSimProducers/test/simPulseShapePhaseII.db'),
+#
+#      toGet = cms.VPSet(         # overide Global Tag use EcalTBWeights_EBEE_offline
+#                  cms.PSet(
+#                      record = cms.string('EcalSimPulseShapeRcd') ,
+#                      tag = cms.string('EcalSimPulseShape_default_mc')
+#                  )
+#              )
+#)
+#process.es_prefer_ecalPulseShape = cms.ESPrefer("PoolDBESSource","ecalConditions")
+#
+#process.EcalCATIAGainRatiosESProducer = cms.ESProducer(
+#	"EcalCATIAGainRatiosESProducer",
+#	ComponentName = cms.string('testGainProducer')
+#)
+#
+#process.EcalLiteDTUPedestalsESProducer = cms.ESProducer(
+#	"EcalLiteDTUPedestalsESProducer",
+#	ComponentName = cms.string('testPedestalProducer')
+#)
 
 #LOGGER:
 process.MessageLogger.cout = cms.untracked.PSet(

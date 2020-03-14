@@ -9,9 +9,10 @@ simCastorDigis = cms.EDAlias(
 print "loading mix simEcalUnsuppressedDigi"
 simEcalUnsuppressedDigis = cms.EDAlias(
     mix = cms.VPSet(
-        cms.PSet(type = cms.string('EBDigiCollectionPh2')),
-#      cms.PSet(type = cms.string('EEDigiCollection')),
-#      cms.PSet(type = cms.string('ESDigiCollection'))
+#        cms.PSet(type = cms.string('EBDigiCollectionPh2')),
+        cms.PSet(type = cms.string('EBDigiCollection')),
+        cms.PSet(type = cms.string('EEDigiCollection')),
+        cms.PSet(type = cms.string('ESDigiCollection'))
     )
 )
 print "loading mix simHcalUnsuppressedDigi"
@@ -73,7 +74,7 @@ simHFNoseUnsuppressedDigis = cms.EDAlias(
     )
 )
 
-print "loading mix simAPV saturation"
+#print "loading mix simAPV saturation"
 #simAPVsaturation = cms.EDAlias(
 #    mix = cms.VPSet(
 #        cms.PSet(type = cms.string('bool'))
