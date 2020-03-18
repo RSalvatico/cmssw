@@ -11,7 +11,7 @@ from SimGeneral.MixingModule.pileupVtxDigitizer_cfi import *
 from SimGeneral.MixingModule.trackingTruthProducerSelection_cfi import *
 from SimGeneral.MixingModule.caloTruthProducer_cfi import *
 from FastSimulation.Tracking.recoTrackAccumulator_cfi import *
-print "digitizer_cfi????"
+
 theDigitizers = cms.PSet(
   pixel = cms.PSet(
     pixelDigitizer

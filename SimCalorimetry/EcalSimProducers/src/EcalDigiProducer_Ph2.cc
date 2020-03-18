@@ -127,7 +127,7 @@ EcalDigiProducer_Ph2::EcalDigiProducer_Ph2( const edm::ParameterSet& params,  ed
    m_EBCorrNoise       ( { {nullptr, nullptr} } )
 
 {
-  std::cout<<"[EcalDigiProducer_Ph2] Constructing producer"<<     "frameSize: " <<  m_readoutFrameSize<< std::endl;
+  //std::cout<<"[EcalDigiProducer_Ph2] Constructing producer"<<     "frameSize: " <<  m_readoutFrameSize<< std::endl;
    if ( m_doEB ) iC.consumes<std::vector<PCaloHit> >(edm::InputTag(m_hitsProducerTag, "EcalHitsEB"));   
 
 
@@ -153,41 +153,41 @@ EcalDigiProducer_Ph2::EcalDigiProducer_Ph2( const edm::ParameterSet& params,  ed
    EcalCorrMatrix_Ph2 ebMatrix[ 2 ] ;
 
 
-   std::cout<<"[EcalDigiProducer_Ph2] Check size10: "<<ebCorMatG10Ph2.size()<<std::endl;
-   std::cout<<"[EcalDigiProducer_Ph2] Check size01: "<<ebCorMatG01Ph2.size()<<std::endl;
+   //std::cout<<"[EcalDigiProducer_Ph2] Check size10: "<<ebCorMatG10Ph2.size()<<std::endl;
+   //std::cout<<"[EcalDigiProducer_Ph2] Check size01: "<<ebCorMatG01Ph2.size()<<std::endl;
    assert( ebCorMatG10Ph2.size() == m_readoutFrameSize ) ;
    assert( ebCorMatG01Ph2.size() == m_readoutFrameSize ) ;
 
-    std::cout<<"[EcalDigiProducer_Ph2] Check Cor Mat consistency"<<std::endl;
+   //std::cout<<"[EcalDigiProducer_Ph2] Check Cor Mat consistency"<<std::endl;
    assert( 1.e-7 > fabs( ebCorMatG10Ph2[0] - 1.0 ) ) ;
    assert( 1.e-7 > fabs( ebCorMatG01Ph2[0] - 1.0 ) ) ;
 
-   std::cout<<"[EcalDigiProducer_Ph2] Check row of cor and col mat"<<std::endl;
+   //std::cout<<"[EcalDigiProducer_Ph2] Check row of cor and col mat"<<std::endl;
    for ( unsigned int row ( 0 ) ; row != m_readoutFrameSize ; ++row )
    {
       assert( 0 == row || 1. >= ebCorMatG10Ph2[row] ) ;
       assert( 0 == row || 1. >= ebCorMatG01Ph2[row] ) ;
 
-      std::cout<<"row "<<row<<std::endl;
+      // std::cout<<"row "<<row<<std::endl;
 
       for ( unsigned int column ( 0 ) ; column <= row ; ++column )
       {
 	 const unsigned int index ( row - column ) ;
-	 std::cout<<"index: "<<index<<std::endl;
-	 std::cout<<"ebCorMat10: "<<ebCorMatG10Ph2[ index ] <<std::endl;
-	 std::cout<<"ebCorMat01: "<<ebCorMatG01Ph2[ index ] <<std::endl;
+	// std::cout<<"index: "<<index<<std::endl;
+	// std::cout<<"ebCorMat10: "<<ebCorMatG10Ph2[ index ] <<std::endl;
+	// std::cout<<"ebCorMat01: "<<ebCorMatG01Ph2[ index ] <<std::endl;
 	 ebMatrix[0]( row, column ) = ebCorMatG10Ph2[ index ] ;
-	  std::cout<<"col mat0: "<<column<<std::endl;
+	 //std::cout<<"col mat0: "<<column<<std::endl;
 	 ebMatrix[1]( row, column ) = ebCorMatG01Ph2[ index ] ;
-	  std::cout<<"col mat1 "<<column<<std::endl;
+	 //std::cout<<"col mat1 "<<column<<std::endl;
       }
    }
-    std::cout<<"[EcalDigiProducer_Ph2] Reset"<<std::endl;
+   //std::cout<<"[EcalDigiProducer_Ph2] Reset"<<std::endl;
    m_EBCorrNoise[0].reset( new CorrelatedNoisifier<EcalCorrMatrix_Ph2>( ebMatrix[0] ) );
    m_EBCorrNoise[1].reset( new CorrelatedNoisifier<EcalCorrMatrix_Ph2>( ebMatrix[1] ) );
 
 
-    std::cout<<"[EcalDigiProducer_Ph2] More reset"<<std::endl;
+   //std::cout<<"[EcalDigiProducer_Ph2] More reset"<<std::endl;
    m_Coder.reset( new EcalCoder_Ph2( addNoise         , 
                                  m_PreMix1        ,
                                  m_EBCorrNoise[0].get() ,
@@ -215,7 +215,7 @@ EcalDigiProducer_Ph2::EcalDigiProducer_Ph2( const edm::ParameterSet& params,  ed
                                             m_APDElectronicsSim.get() ,
                                             false                 ) );
    }
-   std::cout<<"[EcalDigiProducer_Ph2] Barrel reset"<<std::endl;
+   //std::cout<<"[EcalDigiProducer_Ph2] Barrel reset"<<std::endl;
    if( m_doEB ) {
      m_BarrelDigitizer.reset( new EBDigitizer_Ph2( m_EBResponse.get()     , 
                                                m_ElectronicsSim.get() ,
@@ -291,8 +291,8 @@ EcalDigiProducer_Ph2::finalizeEvent(edm::Event& event, edm::EventSetup const& ev
    // run the algorithm
 
    if( m_doEB ) {
-       std::cout << " EcalDigiProducer_Ph2 ::finalize, running digitizer "
-                 << event.run() <<  " " << event.id() << std::endl;
+     //std::cout << " EcalDigiProducer_Ph2 ::finalize, running digitizer "
+     //<< event.run() <<  " " << event.id() << std::endl;
        
      m_BarrelDigitizer->run( *barrelResult, randomEngine_ ) ;
      cacheEBDigis( &*barrelResult ) ;

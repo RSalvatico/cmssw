@@ -49,12 +49,15 @@ TH1I *EBGainHisto[ecalPh2::sampleSize];
 
 
    TH2D* meEBDigiOccupancy_;
+   TH2D* meEBDigiOccupancyHigh_;
+   TH2D* meEBDigiOccupancyLow_;
 
    TH1D* meEBDigiMultiplicity_;
 
   TH1D*  meEBDigiADCGlobal_;
 
    TH1I* SingleChannelE;
+   TH1I* SingleChannelELow;
 
   TH1D*  meEBDigiADCAnalog_[ecalPh2::sampleSize];
   TH1D*  meEBDigiADCgS_[ecalPh2::sampleSize];
@@ -69,7 +72,7 @@ TH1D*   meEBMaximumgt100ADC_;
  
  TH1D*  meEBnADCafterSwitch_;
  
-
+ TF1 *f;
 
 
 

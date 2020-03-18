@@ -80,42 +80,51 @@ usesResource("TFileService");
    EBEnergyHisto[isample] = fs->make<TH1I>(Form("EnergyEB_%d", isample), Form("Energy sample %d  Barrel;ADC",isample), 950 , 100 , 2000 );
    EBGainHisto[isample]   = fs->make<TH1I>(Form("GainEB_%d", isample), Form("Gain Barrel sample %d;Gain",isample) , 5 , 0 , 4 );
  }
- SingleChannelE = fs->make<TH1I>("SingleChannelE", "Energy single channel Barrel;ADC", 17 , -0.5 , 16.5 );
+  SingleChannelE = fs->make<TH1I>("SingleChannelE", "Energy single channel Barrel;ADC", 17 , -0.5 , 16.5 );
+  SingleChannelELow = fs->make<TH1I>("SingleChannelELow", "Energy single channel Barrel;ADC", 17 , -0.5 , 16.5 );
 
-   Char_t histo[200];
+  Char_t histo[200];
+ 
+  sprintf (histo, "EcalDigiTaskBarrelOccupancy" ) ;
+  meEBDigiOccupancy_ = fs->make<TH2D>(histo, histo, 360, 0., 360., 170, -85., 85.);
 
+  sprintf (histo, "EcalDigiTaskBarrelOccupancyHigh" ) ;
+  meEBDigiOccupancyHigh_ = fs->make<TH2D>(histo, histo, 360, 0., 360., 170, -85., 85.);
 
+  sprintf (histo, "EcalDigiTaskBarrelOccupancyLow" ) ;
+  meEBDigiOccupancyLow_ = fs->make<TH2D>(histo, histo, 360, 0., 360., 170, -85., 85.);
   
-   sprintf (histo, "EcalDigiTask Barrel occupancy" ) ;
-   meEBDigiOccupancy_ = fs->make<TH2D>(histo, histo, 360, 0., 360., 170, -85., 85.);
+  sprintf (histo, "EcalDigiTaskBarrelOccupancyMid" ) ;
+  meEBDigiOccupancyMid_ = fs->make<TH2D>(histo, histo, 360, 0., 360., 170, -85., 85.);
 
-   sprintf (histo, "EcalDigiTask Barrel digis multiplicity" ) ;
-   meEBDigiMultiplicity_ = fs->make<TH1D>(histo, histo, 612, 0., 61200);
+  sprintf (histo, "EcalDigiTaskBarrelDigisMultiplicity" ) ;
+  meEBDigiMultiplicity_ = fs->make<TH1D>(histo, histo, 612, 0., 61200);
   
     
-   for (int i = 0; i < ecalPh1::sampleSize ; i++ ) {
+  for (int i = 0; i < ecalPh2::sampleSize ; i++ ) {
 
-     sprintf (histo, "EcalDigiTask Barrel analog pulse %02d", i+1) ;
-     meEBDigiADCAnalog_[i] = fs->make<TH1D>(histo, histo, 4000, 0., 400.);
+    sprintf (histo, "EcalDigiTaskBarrelAnalogPulse%02d", i+1) ;
+    meEBDigiADCAnalog_[i] = fs->make<TH1D>(histo, histo, 4000, 0., 400.);
 
-     sprintf (histo, "EcalDigiTask Barrel ADC pulse %02d Gain 0 - Saturated", i+1) ;
-     meEBDigiADCgS_[i] = fs->make<TH1D>(histo, histo, 4096, -0.5, 4095.5);
-     sprintf (histo, "EcalDigiTask Barrel gain pulse %02d", i+1) ;
-     meEBDigiGain_[i] = fs->make<TH1D>(histo, histo, 4, 0, 4);
+    sprintf (histo, "EcalDigiTaskBarrelADCPulse%02dGain0_Saturated", i+1) ;
+    meEBDigiADCgS_[i] = fs->make<TH1D>(histo, histo, 4096, -0.5, 4095.5);
+    sprintf (histo, "EcalDigiTaskBarrelGainPulse%02d", i+1) ;
+    meEBDigiGain_[i] = fs->make<TH1D>(histo, histo, 4, 0, 4);
 
-   }
+  }
     
-   sprintf (histo, "EcalDigiTask Barrel pedestal for pre-sample" ) ;
-   meEBPedestal_ = fs->make<TH1D>(histo, histo, 4096, -0.5, 4095.5) ;
+  sprintf (histo, "EcalDigiTaskBarrelPedestalForPreSample" ) ;
+  meEBPedestal_ = fs->make<TH1D>(histo, histo, 4096, -0.5, 4095.5) ;
 
-   sprintf (histo, "EcalDigiTask Barrel maximum position gt 100 ADC" ) ;
-   meEBMaximumgt100ADC_ = fs->make<TH1D>(histo, histo, 10, 0., 10.) ;
+  sprintf (histo, "EcalDigiTaskBarrelMaximumPositionGt100ADC" ) ;
+  meEBMaximumgt100ADC_ = fs->make<TH1D>(histo, histo, 10, 0., 10.) ;
 
-   sprintf (histo, "EcalDigiTask Barrel maximum position gt 10 ADC" ) ;
-   meEBMaximumgt10ADC_ = fs->make<TH1D>(histo, histo, 10, 0., 10.) ;
+  sprintf (histo, "EcalDigiTaskBarrelMaximumPositionGt10ADC" ) ;
+  meEBMaximumgt10ADC_ = fs->make<TH1D>(histo, histo, 10, 0., 10.) ;
 
-   //   sprintf (histo, "EcalDigiTask Barrel ADC counts after gain switch" ) ;
-   //meEBnADCafterSwitch_ = fs->make<TH1D>histo, histo, 10, 0., 10.) ;
+  //   sprintf (histo, "EcalDigiTask Barrel ADC counts after gain switch" ) ;
+  //meEBnADCafterSwitch_ = fs->make<TH1D>histo, histo, 10, 0., 10.) ;
+
 
  
 }
@@ -177,18 +186,23 @@ PhaseIAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   //   }
   
    int nDigis=0;
+   int LowGain(0),MidGain(0),HighGain(0);
+   int maxADCValue=0;
 
    for (EBDigiCollection::const_iterator pDigi=pDigiEB->begin(); pDigi!=pDigiEB->end(); ++pDigi) 
     {
-       EBDataFrame digi( *pDigi );
+      LowGain=0;
+      MidGain=0;
+      HighGain=0;
+      maxADCValue=0;
+      
+      EBDataFrame digi( *pDigi );
        int nrSamples = digi.size();
        cout<<"NSamples found: "<<nrSamples<<endl;
        EBDetId ebid = digi.id () ;
        cout<<" Crystall ID "<<ebid<<endl;
        nDigis++;
        cout<<" nDigis aaaaaaa "<<nDigis<<endl;
-       if (meEBDigiOccupancy_) meEBDigiOccupancy_->Fill( ebid.iphi(), ebid.ieta() ); 
-
        double Emax = 0. ;
        int Pmax = 0 ;
        double pedestalPreSample = 0.;
@@ -222,9 +236,21 @@ PhaseIAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           ebADCCounts[sample] = (thisSample&0xFFF);
           ebADCGains[sample]  = (thisSample&(0x3<<12))>>12;
           ebAnalogSignal[sample] = (ebADCCounts[sample]*gainConv_[(int)ebADCGains[sample]]*barrelADCtoGeV_);
+
+	  if(ebADCCounts[sample] > maxADCValue) maxADCValue = ebADCCounts[sample];
+
 	  if( ebid.iphi()==333 and ebid.ieta()==83) SingleChannelE -> SetBinContent(sample,ebADCCounts[sample]);
+
+	  if( ebid.iphi()==334 and ebid.ieta()==83) {
+	    SingleChannelELow -> SetBinContent(sample,ebADCCounts[sample]);
+	  }
 	  
-	  if(ebADCCounts[sample]>40) {
+	  if( ebADCGains[sample]==3) LowGain=1;
+	  if( ebADCGains[sample]==2) MidGain=1;
+	  if( ebADCGains[sample]==1) HighGain=1;
+	  
+	   
+	  if(ebADCCounts[sample]>250) {
 	    cout<<"Channel: "<<ebid<<endl; 
           cout<<"Sample "<<sample<<endl;
           cout<<"		Full data "<<thisSample<<endl;
@@ -234,12 +260,7 @@ PhaseIAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           cout<<"		barrelADCtoGeV_ "<<barrelADCtoGeV_<<endl;
           cout<<"		ebAnalogSignal "<<ebAnalogSignal[sample]<<endl;
 	  }
-        /*  if((thisSample&0xfff)>250) 
-           {
-	       cout<<"Full data "<<thisSample<<endl;
-	       cout<<"Sample "<<sample<<" E: "<<(thisSample&0xfff)<<" gain: "<< (thisSample&(0x3<<12))<<" Analog "<<ebAnalogSignal[sample]<<endl;
-          }*/ 
-
+      
           if(Emax < ebAnalogSignal[sample] ) 
            {
               Emax = ebAnalogSignal[sample] ;
@@ -247,8 +268,18 @@ PhaseIAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
            }
 
       }
-  
-    if(0==1)cout<<"P max "<<Pmax<<endl;
+      
+    if(1==1)cout<<"P max "<<Pmax<<endl;
+    cout<<"High Gain: "<<HighGain<<" MidGain "<<MidGain<<" LowGain "<<LowGain<<endl;
+      cout<<"maxADCValue "<<maxADCValue<<endl;
+      if(maxADCValue > 250) {
+	meEBDigiOccupancy_->SetBinContent( ebid.iphi(), ebid.ieta(),maxADCValue );
+	if(HighGain==1) meEBDigiOccupancyHigh_->SetBinContent( ebid.iphi(), ebid.ieta(),maxADCValue );
+	if(MidGain==1) 	meEBDigiOccupancyMid_->SetBinContent( ebid.iphi(), ebid.ieta(),maxADCValue );
+	if(LowGain==1) 	meEBDigiOccupancyLow_->SetBinContent( ebid.iphi(), ebid.ieta(),maxADCValue );
+
+      }
+      
   }//end digi
    
    

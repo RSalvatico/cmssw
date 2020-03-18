@@ -25,7 +25,6 @@ namespace CLHEP {
 
 class EcalCoder_Ph2 {
    public:
-#warning hard coded sample size  
 
       typedef CaloTSamples_Ph2<float, ecalPh2::sampleSize> EcalSamples;
 

@@ -27,7 +27,7 @@ EcalCoder_Ph2::EcalCoder_Ph2( bool                  addNoise     ,
    m_ebCorrNoise[0] = ebCorrNoise0 ;
    assert( nullptr != m_ebCorrNoise[0] ) ;
    m_ebCorrNoise[1] = ebCorrNoise1 ;
-   std::cout<<"I AM THE CODER PH2!!!!!!!!!!!!!"<<std::endl;
+
 }  
 
 EcalCoder_Ph2::~EcalCoder_Ph2()
@@ -172,14 +172,13 @@ EcalCoder_Ph2::encode( const EcalSamples& ecalSamples ,
        }
        
        if (isSaturated[0] && igain==0) {
-	 std::cout<<"*********I am saturated!!!!!!!!!!!!!!!!"<<std::endl;
 	 break; // gain 0 (x10) channel is saturated, readout will use gain 1 (x10)
        }
        else adctrace[i] = adc;
 
        if(ecalSamples[i]>0.)
          {
-           std::cout<<" igain = "<<igain<<" pedestals[igain] = "<<pedestals[igain]<<" i = "<<i<<" trueRMS[igain] = "<<trueRMS[igain]<<" noiseframe[igain][i] = "<<noiseframe[igain][i]<<" asignal = "<<asignal<<" isignal = "<<isignal<<" adc = "<<adc<<std::endl;       
+	   //           std::cout<<" igain = "<<igain<<" pedestals[igain] = "<<pedestals[igain]<<" i = "<<i<<" trueRMS[igain] = "<<trueRMS[igain]<<" noiseframe[igain][i] = "<<noiseframe[igain][i]<<" asignal = "<<asignal<<" isignal = "<<isignal<<" adc = "<<adc<<std::endl;       
          }
 
      } // for adc
