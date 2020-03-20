@@ -10,6 +10,18 @@
 
 //#include "Geometry/CaloGeometry/interface/CaloGenericDetId.h"
 
+/////////////////////
+//NOTE:
+//TO BE CORRECTLY IMPLEMENTED!
+//Simona Cometti, [20.03.20 12:05]
+//[In reply to Dario Soldi]
+//Allora nella versione 1 i samples a gain 1 erano solo 8
+//Centrati così:
+//Quindi 2 samples prima e 5 dopo a quello saturato
+//Nella versione 1.2 c'è la possibilità di avere 8 samples o 16 samples dal gain 1
+//Quando è selezionata l'opzione dei 16 samples:
+//5 samples prima, il sample saturo e poi 10 samples dopo
+
 
 EcalCoder_Ph2::EcalCoder_Ph2( bool                  addNoise     , 
 		      bool                  PreMix1      ,
