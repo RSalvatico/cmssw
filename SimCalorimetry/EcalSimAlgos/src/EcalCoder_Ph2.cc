@@ -21,7 +21,7 @@
 //Nella versione 1.2 c'è la possibilità di avere 8 samples o 16 samples dal gain 1
 //Quando è selezionata l'opzione dei 16 samples:
 //5 samples prima, il sample saturo e poi 10 samples dopo
-
+const float DTUVersion = 1.0;
 
 EcalCoder_Ph2::EcalCoder_Ph2( bool                  addNoise     , 
 		      bool                  PreMix1      ,
@@ -156,9 +156,18 @@ EcalCoder_Ph2::encode( const EcalSamples& ecalSamples ,
 
 
    bool isSaturated[]={false,false};
-   std::vector<int> adctrace(csize);
+   std::vector<std::vector<int>> adctrace(csize);
+   unsigned int saturatedSample[]={0,0};
 
-   // fill ADC trace in gain 0 (x10) and gain 1 (x1)
+     for( unsigned int i ( 0 ) ; i != csize ; ++i )  adctrace[i].resize(NGAINS);
+     
+   for (unsigned int igain=0; igain<NGAINS; ++igain) {
+     for( unsigned int i ( 0 ) ; i != csize ; ++i ) {
+       adctrace[i][igain]=-1;
+     }
+   }
+
+    // fill ADC trace in gain 0 (x10) and gain 1 (x1)
      //NOTE: Before was  pedestals[igain], widths[igain]
    
    for (unsigned int igain=0; igain<NGAINS; ++igain) {
@@ -181,13 +190,14 @@ EcalCoder_Ph2::encode( const EcalSamples& ecalSamples ,
        if (adc > MAXADC) {
 	 adc = MAXADC;
 	 isSaturated[igain] = true;
+	 saturatedSample[igain] = i;
        }
        
        if (isSaturated[0] && igain==0) {
 	 break; // gain 0 (x10) channel is saturated, readout will use gain 1 (x10)
        }
-       else adctrace[i] = adc;
-
+       else adctrace[i][igain]=adc; 
+       
        if(ecalSamples[i]>0.)
          {
 	   //           std::cout<<" igain = "<<igain<<" pedestals[igain] = "<<pedestals[igain]<<" i = "<<i<<" trueRMS[igain] = "<<trueRMS[igain]<<" noiseframe[igain][i] = "<<noiseframe[igain][i]<<" asignal = "<<asignal<<" isignal = "<<isignal<<" adc = "<<adc<<std::endl;       
@@ -199,12 +209,17 @@ EcalCoder_Ph2::encode( const EcalSamples& ecalSamples ,
    } // for igain
 
    int igain =0;
-   if (isSaturated[0] ) igain =1;
-
+ 
    // Note: we assume that Pileup generates small signals, and we will not saturate when adding pedestals
-
    for ( unsigned int j =0; j < ecalSamples.size(); ++j ) {
-      df.setSample(j, EcalMGPASample(adctrace[j], igain));   
+
+     if (DTUVersion==1.0 and isSaturated[0] and j >= (saturatedSample[0] - 2) and  j < (saturatedSample[0] + 5)) igain=1;
+     
+     else if(DTUVersion==1.2 and isSaturated[0] and j >= (saturatedSample[0] - 5) and  j < (saturatedSample[0] + 10)) igain=1;
+
+     else igain = 0;
+          
+     df.setSample(j, EcalMGPASample(adctrace[j][igain], igain));   
    }
 }
                                       
