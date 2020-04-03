@@ -187,10 +187,14 @@ PhaseIIAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   int nDigis=0;
   int maxADCValue=0;
   int LowGain=0;
+  double  gainConv_[2]={10,1};
+  double barrelADCtoGeV_ = 0.048; //GeV
+
+
   for (EBDigiCollectionPh2::const_iterator pDigi=pDigiEB->begin(); pDigi!=pDigiEB->end(); ++pDigi) 
     {
       maxADCValue=0;
-      LowGain=1;
+      LowGain=0;
       
       EBDataFrame digi( *pDigi );
       int nrSamples = digi.size();
@@ -219,10 +223,6 @@ PhaseIIAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
           ebADCGains[sample] = 0.;
         }
 
-      double  gainConv_[2]={10,1};
-      // saturated channels
-      double barrelADCtoGeV_ = 0.048; //GeV
-
       // EcalIntercalibConstantsMC* ical = 
 
       // EcalIntercalibConstantMCMap &icalMap =        
@@ -238,16 +238,16 @@ PhaseIIAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 
 	  if(ebADCCounts[sample] > maxADCValue) maxADCValue = ebADCCounts[sample];
 
-	  if( ebADCGains[sample]==0) LowGain=1;
-	  else LowGain=0;
+	  if( ebADCGains[sample]==1) LowGain=1;
+	 
 	    
 	  if( ebid.iphi()==333 and ebid.ieta()==83) {
 	    SingleChannelE -> SetBinContent(sample,ebADCCounts[sample]);
 	  }
-	  if( ebid.iphi()==334 and ebid.ieta()==83) {
+	  if( ebid.iphi()==333 and ebid.ieta()==83) {
 	    SingleChannelELow -> SetBinContent(sample,ebADCCounts[sample]);
 	  }
-	  if(ebADCCounts[sample]>40) {
+	  if(ebADCCounts[sample] > 27) {
 	    cout<<"Channel: "<<ebid<<endl; 
 	    cout<<"Sample "<<sample<<endl;
 	    cout<<"		Full data "<<thisSample<<endl;
@@ -256,6 +256,7 @@ PhaseIIAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 	    cout<<"		gainConv_ "<<gainConv_[(int)ebADCGains[sample]]<<endl;
 	    cout<<"		barrelADCtoGeV_ "<<barrelADCtoGeV_<<endl;
 	    cout<<"		ebAnalogSignal "<<ebAnalogSignal[sample]<<endl;
+	    cout<<"		LowGain "<<LowGain<<endl;
 
 	  }
         
@@ -267,6 +268,7 @@ PhaseIIAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 
 	} // end samples 
       if(maxADCValue > 27.5) {
+	cout<<"Filling Histo: "<<LowGain<<endl;
 	meEBDigiOccupancy_->SetBinContent( ebid.iphi(), ebid.ieta(),maxADCValue );
 	if(LowGain==0) meEBDigiOccupancyHigh_->SetBinContent( ebid.iphi(), ebid.ieta(),maxADCValue );
 	else 	meEBDigiOccupancyLow_->SetBinContent( ebid.iphi(), ebid.ieta(),maxADCValue );
