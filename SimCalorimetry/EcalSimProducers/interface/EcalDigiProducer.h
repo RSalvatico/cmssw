@@ -2,10 +2,12 @@
 #define SimCalorimetry_EcalSimProducers_EcalDigiProducer_h
 
 #include "DataFormats/Math/interface/Error.h"
+#include "CalibFormats/CaloObjects/interface/CaloTSamples.h"
 #include "FWCore/Framework/interface/ProducesCollector.h"
 #include "SimCalorimetry/EcalSimAlgos/interface/APDShape.h"
 #include "SimCalorimetry/EcalSimAlgos/interface/EBShape.h"
 #include "SimCalorimetry/EcalSimAlgos/interface/EEShape.h"
+#include "SimCalorimetry/EcalSimAlgos/interface/EcalElectronicsSim.h"
 #include "SimCalorimetry/EcalSimAlgos/interface/ESElectronicsSim.h"
 #include "SimCalorimetry/EcalSimAlgos/interface/ESShape.h"
 #include "SimCalorimetry/EcalSimAlgos/interface/EcalCorrelatedNoiseMatrix.h"
@@ -22,6 +24,7 @@ typedef EcalTDigitizer<EBDigitizerTraits> EBDigitizer;
 typedef EcalTDigitizer<EEDigitizerTraits> EEDigitizer;
 typedef CaloTDigitizer<ESOldDigitizerTraits> ESOldDigitizer;
 
+
 class ESDigitizer;
 
 class APDSimParameters;
@@ -30,7 +33,6 @@ class ESHitResponse;
 class CaloHitResponse;
 class EcalSimParameterMap;
 class EcalCoder;
-class EcalElectronicsSim;
 class ESElectronicsSim;
 class ESElectronicsSimFast;
 class EcalBaseSignalGenerator;
@@ -140,10 +142,13 @@ private:
   std::unique_ptr<EBDigitizer> m_BarrelDigitizer;
   std::unique_ptr<EEDigitizer> m_EndcapDigitizer;
 
-  std::unique_ptr<EcalElectronicsSim> m_ElectronicsSim;
+  typedef CaloTSamples<float,10> EcalSamples;
+
+  typedef EcalElectronicsSim<EcalCoder, EcalSamples, EcalDataFrame> EcalElectronicsSim_Ph1;
+  std::unique_ptr<EcalElectronicsSim_Ph1> m_ElectronicsSim;
   std::unique_ptr<EcalCoder> m_Coder;
 
-  std::unique_ptr<EcalElectronicsSim> m_APDElectronicsSim;
+  std::unique_ptr<EcalElectronicsSim_Ph1> m_APDElectronicsSim;
   std::unique_ptr<EcalCoder> m_APDCoder;
 
   const CaloGeometry *m_Geometry;

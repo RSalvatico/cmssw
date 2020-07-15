@@ -7,21 +7,21 @@
 #include "FWCore/Framework/interface/ProducesCollector.h"
 #include "SimGeneral/NoiseGenerators/interface/CorrelatedNoisifier.h"
 #include "SimCalorimetry/EcalSimAlgos/interface/EcalCorrelatedNoiseMatrix_Ph2.h"
-
+//#include "SimCalorimetry/EcalSimAlgos/interface/EcalElectronicsSim.h"
 #include "SimCalorimetry/CaloSimAlgos/interface/CaloTDigitizer.h"
-#include "SimCalorimetry/EcalSimAlgos/interface/EcalTDigitizer_Ph2.h"
-#include "SimCalorimetry/EcalSimAlgos/interface/EcalDigitizerTraits_Ph2.h"
+#include "SimCalorimetry/EcalSimAlgos/interface/EcalTDigitizer.h"
+#include "SimCalorimetry/EcalSimAlgos/interface/EcalDigitizerTraits.h"
 #include "SimGeneral/MixingModule/interface/DigiAccumulatorMixMod.h"
 #include "SimCalorimetry/EcalSimAlgos/interface/EBHitResponse.h"
 #include <vector>
 
-typedef EcalTDigitizer_Ph2<EBDigitizerTraits_Ph2> EBDigitizer_Ph2;
+
 
 class APDSimParameters;
 class CaloHitResponse;
-class EcalSimParameterMap_Ph2;
+class EcalSimParameterMap;
 class EcalLiteDTUCoder;
-class EcalElectronicsSim_Ph2;
+
 class EcalBaseSignalGenerator;
 class CaloGeometry;
 class EBDigiCollectionPh2;
@@ -44,6 +44,10 @@ namespace CLHEP {
 
 class EcalDigiProducer_Ph2 : public DigiAccumulatorMixMod {
 public:
+
+  typedef EcalTDigitizer<EBDigitizerTraits_Ph2> EBDigitizer_Ph2;
+  typedef EBDigitizerTraits_Ph2::ElectronicsSim  EcalElectronicsSim_Ph2;
+    
   EcalDigiProducer_Ph2(const edm::ParameterSet& params,
                        edm::ProducesCollector producesCollector,
                        edm::ConsumesCollector& iC);
@@ -86,7 +90,7 @@ private:
   const unsigned int m_readoutFrameSize;
 
 protected:
-  std::unique_ptr<const EcalSimParameterMap_Ph2> m_ParameterMap;
+  std::unique_ptr<const EcalSimParameterMap> m_ParameterMap;
 
 private:
   const std::string m_apdDigiTag;
@@ -101,7 +105,6 @@ private:
   const bool m_PreMix1;
   const bool m_PreMix2;
 
-  const bool m_doEB;
 
   std::unique_ptr<EBDigitizer_Ph2> m_APDDigitizer;
   std::unique_ptr<EBDigitizer_Ph2> m_BarrelDigitizer;
@@ -109,7 +112,8 @@ private:
   std::unique_ptr<EcalElectronicsSim_Ph2> m_ElectronicsSim;
   std::unique_ptr<EcalLiteDTUCoder> m_Coder;
 
-  std::unique_ptr<EcalElectronicsSim_Ph2> m_APDElectronicsSim;
+  typedef CaloTSamples<float,ecalPh2::sampleSize> EcalSamples_Ph2 ;
+  std::unique_ptr<EcalElectronicsSim<EcalLiteDTUCoder, EcalSamples_Ph2, EcalDataFrame_Ph2> > m_APDElectronicsSim;
   std::unique_ptr<EcalLiteDTUCoder> m_APDCoder;
 
   const CaloGeometry* m_Geometry;

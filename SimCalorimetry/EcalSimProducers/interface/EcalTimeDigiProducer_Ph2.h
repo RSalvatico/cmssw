@@ -3,7 +3,7 @@
 
 #include "DataFormats/Math/interface/Error.h"
 
-#include "SimCalorimetry/EcalSimAlgos/interface/EcalDigitizerTraits_Ph2.h"
+#include "SimCalorimetry/EcalSimAlgos/interface/EcalDigitizerTraits.h"
 #include "SimGeneral/MixingModule/interface/DigiAccumulatorMixMod.h"
 #include "SimDataFormats/CaloHit/interface/PCaloHit.h"
 #include "DataFormats/EcalDigi/interface/EcalDigiCollections.h"
@@ -13,10 +13,8 @@
 
 #include <vector>
 
-class ESDigitizer;
 
 class CaloGeometry;
-class EcalSimParameterMap_Ph2;
 class PileUpEventPrincipal;
 class EcalTimeMapDigitizer;
 

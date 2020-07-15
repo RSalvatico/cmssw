@@ -2,11 +2,10 @@
 #include "SimCalorimetry/EcalSimProducers/interface/EcalDigiProducer_Ph2.h"
 #include "SimCalorimetry/EcalSimAlgos/interface/EBHitResponse.h"
 #include "SimCalorimetry/CaloSimAlgos/interface/CaloHitResponse.h"
-#include "SimCalorimetry/EcalSimAlgos/interface/EcalSimParameterMap_Ph2.h"
+#include "SimCalorimetry/EcalSimAlgos/interface/EcalSimParameterMap.h"
 #include "SimCalorimetry/EcalSimAlgos/interface/APDSimParameters.h"
 #include "DataFormats/EcalDigi/interface/EcalDigiCollections.h"
 #include "SimCalorimetry/EcalSimAlgos/interface/EcalLiteDTUCoder.h"
-#include "SimCalorimetry/EcalSimAlgos/interface/EcalElectronicsSim_Ph2.h"
 #include "Geometry/CaloGeometry/interface/CaloGeometry.h"
 #include "CalibFormats/CaloObjects/interface/CaloSamples.h"
 #include "Geometry/CaloGeometry/interface/CaloSubdetectorGeometry.h"
@@ -64,8 +63,10 @@ EcalDigiProducer_Ph2::EcalDigiProducer_Ph2(const edm::ParameterSet& params, edm:
       m_EBs25notCont(params.getParameter<double>("EBs25notContainment")),
 
       m_readoutFrameSize(params.getParameter<int>("readoutFrameSize")),
-      m_ParameterMap(new EcalSimParameterMap_Ph2(params.getParameter<double>("simHitToPhotoelectronsBarrel"),
+      m_ParameterMap(new EcalSimParameterMap(    params.getParameter<double>("simHitToPhotoelectronsBarrel"),
                                                  params.getParameter<double>("photoelectronsToAnalogBarrel"),
+                                                 0, // endcap parameters not needed
+                                                 0,
                                                  params.getParameter<double>("samplingFactor"),
                                                  params.getParameter<double>("timePhase"),
                                                  m_readoutFrameSize,
@@ -98,8 +99,6 @@ EcalDigiProducer_Ph2::EcalDigiProducer_Ph2(const edm::ParameterSet& params, edm:
       m_PreMix1(params.getParameter<bool>("EcalPreMixStage1")),
       m_PreMix2(params.getParameter<bool>("EcalPreMixStage2")),
 
-      m_doEB(params.getParameter<bool>("doEB")),
-
       m_APDDigitizer(nullptr),
       m_BarrelDigitizer(nullptr),
       m_ElectronicsSim(nullptr),
@@ -111,8 +110,8 @@ EcalDigiProducer_Ph2::EcalDigiProducer_Ph2(const edm::ParameterSet& params, edm:
 
 {
   //std::cout<<"[EcalDigiProducer_Ph2] Constructing producer"<<     "frameSize: " <<  m_readoutFrameSize<< std::endl;
-  if (m_doEB)
-    iC.consumes<std::vector<PCaloHit> >(edm::InputTag(m_hitsProducerTag, "EcalHitsEB"));
+  
+  iC.consumes<std::vector<PCaloHit> >(edm::InputTag(m_hitsProducerTag, "EcalHitsEB"));
 
   const std::vector<double> ebCorMatG10Ph2 = params.getParameter<std::vector<double> >("EBCorrNoiseMatrixG10Ph2");
   const std::vector<double> ebCorMatG01Ph2 = params.getParameter<std::vector<double> >("EBCorrNoiseMatrixG01Ph2");
@@ -128,7 +127,6 @@ EcalDigiProducer_Ph2::EcalDigiProducer_Ph2(const edm::ParameterSet& params, edm:
 
   // further phase for cosmics studies
   if (cosmicsPhase) {
-    if (m_doEB)
       m_EBResponse->setPhaseShift(1. + cosmicsShift);
   }
 
@@ -179,10 +177,9 @@ EcalDigiProducer_Ph2::EcalDigiProducer_Ph2(const edm::ParameterSet& params, edm:
 
     m_APDDigitizer.reset(new EBDigitizer_Ph2(m_APDResponse.get(), m_APDElectronicsSim.get(), false));
   }
-  //std::cout<<"[EcalDigiProducer_Ph2] Barrel reset"<<std::endl;
-  if (m_doEB) {
-    m_BarrelDigitizer.reset(new EBDigitizer_Ph2(m_EBResponse.get(), m_ElectronicsSim.get(), addNoise));
-  }
+ 
+  m_BarrelDigitizer.reset(new EBDigitizer_Ph2(m_EBResponse.get(), m_ElectronicsSim.get(), addNoise));
+  
 
   // std::cout<<"[EcalDigiProducer_Ph2] End constructor"<<std::endl;
 }
@@ -195,16 +192,16 @@ void EcalDigiProducer_Ph2::initializeEvent(edm::Event const& event, edm::EventSe
 
   checkGeometry(eventSetup);
   checkCalibrations(event, eventSetup);
-  if (m_doEB) {
-    m_BarrelDigitizer->initializeHits();
-    if (m_apdSeparateDigi) {
+ 
+  m_BarrelDigitizer->initializeHits();
+  if (m_apdSeparateDigi) {
       m_APDDigitizer->initializeHits();
-    }
   }
+ 
 }
 
 void EcalDigiProducer_Ph2::accumulateCaloHits(HitsHandle const& ebHandle, int bunchCrossing) {
-  if (m_doEB && ebHandle.isValid()) {
+  if (ebHandle.isValid()) {
     m_BarrelDigitizer->add(*ebHandle.product(), bunchCrossing, randomEngine_);
 
     if (m_apdSeparateDigi) {
@@ -216,12 +213,11 @@ void EcalDigiProducer_Ph2::accumulateCaloHits(HitsHandle const& ebHandle, int bu
 void EcalDigiProducer_Ph2::accumulate(edm::Event const& e, edm::EventSetup const& eventSetup) {
   // Step A: Get Inputs
   edm::Handle<std::vector<PCaloHit> > ebHandle;
-  if (m_doEB) {
-    m_EBShape.setEventSetup(eventSetup);   // need to set the eventSetup here, otherwise pre-mixing module will not wrk
-    m_APDShape.setEventSetup(eventSetup);  //
-    edm::InputTag ebTag(m_hitsProducerTag, "EcalHitsEB");
-    e.getByLabel(ebTag, ebHandle);
-  }
+ 
+  m_EBShape.setEventSetup(eventSetup);   // need to set the eventSetup here, otherwise pre-mixing module will not wrk
+  m_APDShape.setEventSetup(eventSetup);  //
+  edm::InputTag ebTag(m_hitsProducerTag, "EcalHitsEB");
+  e.getByLabel(ebTag, ebHandle);
 
   accumulateCaloHits(ebHandle, 0);
 }
@@ -231,34 +227,30 @@ void EcalDigiProducer_Ph2::accumulate(PileUpEventPrincipal const& e,
                                       edm::StreamID const& streamID) {
   // Step A: Get Inputs
   edm::Handle<std::vector<PCaloHit> > ebHandle;
-  if (m_doEB) {
-    edm::InputTag ebTag(m_hitsProducerTag, "EcalHitsEB");
-    e.getByLabel(ebTag, ebHandle);
-  }
+
+  edm::InputTag ebTag(m_hitsProducerTag, "EcalHitsEB");
+  e.getByLabel(ebTag, ebHandle);
+
   accumulateCaloHits(ebHandle, e.bunchCrossing());
 }
 
 void EcalDigiProducer_Ph2::finalizeEvent(edm::Event& event, edm::EventSetup const& eventSetup) {
   // Step B: Create empty output
-  std::unique_ptr<EBDigiCollectionPh2> apdResult(!m_apdSeparateDigi || !m_doEB ? nullptr : new EBDigiCollectionPh2());
+  std::unique_ptr<EBDigiCollectionPh2> apdResult(!m_apdSeparateDigi ? nullptr : new EBDigiCollectionPh2());
   std::unique_ptr<EBDigiCollectionPh2> barrelResult(new EBDigiCollectionPh2());
 
   // run the algorithm
 
-  if (m_doEB) {
-    //std::cout << " EcalDigiProducer_Ph2 ::finalize, running digitizer "
-    //<< event.run() <<  " " << event.id() << std::endl;
+  m_BarrelDigitizer->run(*barrelResult, randomEngine_);
+  cacheEBDigis(&*barrelResult);
 
-    m_BarrelDigitizer->run(*barrelResult, randomEngine_);
-    cacheEBDigis(&*barrelResult);
+  edm::LogInfo("DigiInfo") << "EB Digis: " << barrelResult->size();
 
-    edm::LogInfo("DigiInfo") << "EB Digis: " << barrelResult->size();
-
-    if (m_apdSeparateDigi) {
+  if (m_apdSeparateDigi) {
       m_APDDigitizer->run(*apdResult, randomEngine_);
       edm::LogInfo("DigiInfo") << "APD Digis: " << apdResult->size();
-    }
   }
+  
 
   // Step D: Put outputs into event
   if (m_apdSeparateDigi) {
@@ -279,11 +271,11 @@ void EcalDigiProducer_Ph2::beginLuminosityBlock(edm::LuminosityBlock const& lumi
   }
   CLHEP::HepRandomEngine* engine = &rng->getEngine(lumi.index());
 
-  if (m_doEB) {
+
     if (nullptr != m_APDResponse)
       m_APDResponse->initialize(engine);
     m_EBResponse->initialize(engine);
-  }
+
 }
 
 void EcalDigiProducer_Ph2::checkCalibrations(const edm::Event& event, const edm::EventSetup& eventSetup) {
@@ -356,15 +348,14 @@ void EcalDigiProducer_Ph2::checkGeometry(const edm::EventSetup& eventSetup) {
 }
 
 void EcalDigiProducer_Ph2::updateGeometry() {
-  if (m_doEB) {
     if (nullptr != m_APDResponse)
-      m_APDResponse->setGeometry(m_Geometry->getSubdetectorGeometry(DetId::Ecal, EcalBarrel));
+        m_APDResponse->setGeometry(m_Geometry->getSubdetectorGeometry(DetId::Ecal, EcalBarrel));
     m_EBResponse->setGeometry(m_Geometry->getSubdetectorGeometry(DetId::Ecal, EcalBarrel));
-  }
+  
 }
 
 void EcalDigiProducer_Ph2::setEBNoiseSignalGenerator(EcalBaseSignalGenerator* noiseGenerator) {
-  //noiseGenerator->setParameterMap(theParameterMap);
+  
   if (nullptr != m_BarrelDigitizer)
     m_BarrelDigitizer->setNoiseSignalGenerator(noiseGenerator);
 }
