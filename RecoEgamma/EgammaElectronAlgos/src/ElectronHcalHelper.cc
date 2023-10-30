@@ -26,6 +26,16 @@ void ElectronHcalHelper::beginEvent(const edm::Event& evt, const edm::EventSetup
   hcalChannelQuality_ = &eventSetup.getData(hcalChannelQualityToken_);
   hcalSevLvlComputer_ = &eventSetup.getData(hcalSevLvlComputerToken_);
   towerMap_ = &eventSetup.getData(towerMapToken_);
+  
+  //The rationale here is to have two vectors for the eT thresholds in HB and HE that have the same size as the "e" threshold ones, namely cfg_.eThresHB,
+  //which are vectorH objects. This is in case in the future the eT thresholds are used as well and if the vector has to have the same size of the e threshold ones
+  EgammaHcalIsolation::vectorH eTThreshHB;
+  eTThreshHB.resize((cfg_.eThresHB).size());
+  std::fill(eTThreshHB.begin(),eTThreshHB.end(), 0.);
+
+  EgammaHcalIsolation::vectorH eTThreshHE;
+  eTThreshHE.resize((cfg_.eThresHE).size());
+  std::fill(eTThreshHE.begin(),eTThreshHE.end(), 0.);
 
   if (cfg_.onlyBehindCluster) {
     hcalIso_ = std::make_unique<EgammaHcalIsolation>(EgammaHcalIsolation::InclusionRule::isBehindClusterSeed,
@@ -33,10 +43,10 @@ void ElectronHcalHelper::beginEvent(const edm::Event& evt, const edm::EventSetup
                                                      EgammaHcalIsolation::InclusionRule::withinConeAroundCluster,
                                                      0.,
                                                      cfg_.eThresHB,
-                                                     EgammaHcalIsolation::arrayHB{{0., 0., 0., 0.}},
+						     eTThreshHB,
                                                      cfg_.maxSeverityHB,
                                                      cfg_.eThresHE,
-                                                     EgammaHcalIsolation::arrayHE{{0., 0., 0., 0., 0., 0., 0.}},
+                                                     eTThreshHE,
                                                      cfg_.maxSeverityHE,
                                                      evt.get(cfg_.hbheRecHits),
                                                      eventSetup.getHandle(caloGeometryToken_),
@@ -50,10 +60,10 @@ void ElectronHcalHelper::beginEvent(const edm::Event& evt, const edm::EventSetup
                                                      EgammaHcalIsolation::InclusionRule::withinConeAroundCluster,
                                                      0.,
                                                      cfg_.eThresHB,
-                                                     EgammaHcalIsolation::arrayHB{{0., 0., 0., 0.}},
+                                                     eTThreshHB,
                                                      cfg_.maxSeverityHB,
                                                      cfg_.eThresHE,
-                                                     EgammaHcalIsolation::arrayHE{{0., 0., 0., 0., 0., 0., 0.}},
+                                                     eTThreshHE,
                                                      cfg_.maxSeverityHE,
                                                      evt.get(cfg_.hbheRecHits),
                                                      eventSetup.getHandle(caloGeometryToken_),

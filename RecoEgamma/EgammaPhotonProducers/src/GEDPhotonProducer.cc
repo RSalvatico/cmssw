@@ -53,6 +53,9 @@
 #include "RecoEgamma/EgammaIsolationAlgos/interface/HcalPFClusterIsolation.h"
 #include "CondFormats/GBRForest/interface/GBRForest.h"
 #include "CommonTools/MVAUtils/interface/GBRForestTools.h"
+#include "CondFormats/DataRecord/interface/HcalPFCutsRcd.h"
+#include "CondTools/Hcal/interface/HcalPFCutsHandler.h"
+#include "Geometry/CaloTopology/interface/HcalTopology.h"
 
 class CacheData {
 public:
@@ -104,6 +107,10 @@ private:
 
   private:
     unsigned int flags_;
+    edm::ESGetToken<HcalTopology, HcalRecNumberingRecord> htopoToken_;
+    edm::ESGetToken<HcalPFCuts, HcalPFCutsRcd> hcalCutsToken_;
+    bool cutsFromDB;
+    //HcalPFCuts* paramPF;
   };
 
   void fillPhotonCollection(edm::Event& evt,
@@ -284,6 +291,7 @@ GEDPhotonProducer::GEDPhotonProducer(const edm::ParameterSet& config, const Cach
     photonProducerT_ = consumes(photonProducer_);
     pfCandidates_ = consumes(config.getParameter<edm::InputTag>("pfCandidates"));
 
+    cutsFromDB = config.getParameter<bool>("usePFcutsFromDB");
     const edm::ParameterSet& pfIsolCfg = config.getParameter<edm::ParameterSet>("pfIsolCfg");
     auto getVMToken = [&pfIsolCfg, this](const std::string& name) {
       return consumes(pfIsolCfg.getParameter<edm::InputTag>(name));
@@ -294,6 +302,7 @@ GEDPhotonProducer::GEDPhotonProducer(const edm::ParameterSet& config, const Cach
     phoChargedWorstVtxIsoToken_ = getVMToken("chargedHadronWorstVtxIso");
     phoChargedWorstVtxGeomVetoIsoToken_ = getVMToken("chargedHadronWorstVtxGeomVetoIso");
     phoChargedPFPVIsoToken_ = getVMToken("chargedHadronPFPVIso");
+    cutsFromDB = conf.getParameter<bool>("usePFcutsFromDB");
 
     //OOT photons in legacy 80X re-miniAOD do not have PF cluster embeded into the reco object
     //to preserve 80X behaviour
@@ -363,9 +372,22 @@ GEDPhotonProducer::GEDPhotonProducer(const edm::ParameterSet& config, const Cach
 
       cfgCone.hbheRecHits = hbheRecHits_;
 
-      cfgCone.eThresHB = config.getParameter<EgammaHcalIsolation::arrayHB>("recHitEThresholdHB");
+      if(cutsFromDB){
+	const HcalTopology& htopo = evt.getData(htopoToken_);
+	const HcalPFCuts& hcalCuts = evt.getData(hcalCutsToken_);
+	std::unique_ptr<HcalPFCuts> paramPF_;
+	paramPF_ = std::make_unique<HcalPFCuts>(hcalCuts);
+	paramPF_->setTopo(&htopo);
+	paramPF = paramPF_.release();
+
+	HcalDetId id = hbheRecHits_.detId();
+	const HcalPFCut* item = hcalCuts->getValues(id.rawId());
+      } else{
+	cfgCone.eThresHB = config.getParameter<EgammaHcalIsolation::arrayHB>("recHitEThresholdHB"); //mypointer
+	cfgCone.eThresHE = config.getParameter<EgammaHcalIsolation::arrayHE>("recHitEThresholdHE");
+      }
       cfgCone.maxSeverityHB = config.getParameter<int>("maxHcalRecHitSeverity");
-      cfgCone.eThresHE = config.getParameter<EgammaHcalIsolation::arrayHE>("recHitEThresholdHE");
+
       cfgCone.maxSeverityHE = cfgCone.maxSeverityHB;
     }
     cfgBc.hOverEConeSize = 0.;

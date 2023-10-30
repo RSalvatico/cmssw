@@ -38,19 +38,21 @@ double scaleToEt(const double &eta);
 class EgammaHcalIsolation {
 public:
   enum class InclusionRule : int { withinConeAroundCluster = 0, isBehindClusterSeed = 1 };
-  using arrayHB = std::array<double, 4>;
-  using arrayHE = std::array<double, 7>;
+  //using arrayHB = std::array<double, 4>;
+  //using arrayHE = std::array<double, 7>;
+  //using arrayHB = std::vector<double>;
+  using vectorH = std::vector<double>;
 
   // constructors
   EgammaHcalIsolation(InclusionRule extIncRule,
                       double extRadius,
                       InclusionRule intIncRule,
                       double intRadius,
-                      const arrayHB &eThresHB,
-                      const arrayHB &etThresHB,
+                      const vectorH &eThresHB,
+                      const vectorH &etThresHB,
                       int maxSeverityHB,
-                      const arrayHE &eThresHE,
-                      const arrayHE &etThresHE,
+                      const vectorH &eThresHE,
+                      const vectorH &etThresHE,
                       int maxSeverityHE,
                       const HBHERecHitCollection &mhbhe,
                       edm::ESHandle<CaloGeometry> caloGeometry,
@@ -63,11 +65,11 @@ public:
                       double extRadius,
                       InclusionRule intIncRule,
                       double intRadius,
-                      const arrayHB &eThresHB,
-                      const arrayHB &etThresHB,
+                      const vectorH &eThresHB,
+                      const vectorH &etThresHB,
                       int maxSeverityHB,
-                      const arrayHE &eThresHE,
-                      const arrayHE &etThresHE,
+                      const vectorH &eThresHE,
+                      const vectorH &etThresHE,
                       int maxSeverityHE,
                       const HBHERecHitCollection &mhbhe,
                       const CaloGeometry &caloGeometry,
@@ -156,12 +158,12 @@ private:
   InclusionRule intIncRule_;
   double intRadius_;
 
-  arrayHB eThresHB_;
-  arrayHB etThresHB_;
+  vectorH eThresHB_;
+  vectorH etThresHB_;
   int maxSeverityHB_;
 
-  arrayHE eThresHE_;
-  arrayHE etThresHE_;
+  vectorH eThresHE_;
+  vectorH etThresHE_;
   int maxSeverityHE_;
 
   const HBHERecHitCollection &mhbhe_;
