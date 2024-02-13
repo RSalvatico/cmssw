@@ -33,6 +33,9 @@ autoNANO = {
                'customize': 'muDPGNanoCustomize'},
     'MUDPGBKG' : {'sequence': 'muDPGNanoProducerBkg',
                   'customize': 'muDPGNanoBkgCustomize'},
+    #EGM flavours: add variables through customize
+    'EGM' : {'sequence': '',
+             'customize' : 'PhysicsTools/NanoAOD/egamma_custom_cff.addExtraEGammaVarsCustomize'},
     # PromptReco config: PHYS+L1
     'Prompt' : {'sequence': '@PHYS', 
                 'customize': '@PHYS+@L1'}

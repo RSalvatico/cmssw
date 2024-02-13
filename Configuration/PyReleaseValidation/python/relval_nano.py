@@ -166,6 +166,13 @@ steps['muDPGNANOBkg_data13.0']=merge([{'-s' : 'RAW2DIGI,NANO:@MUDPGBKG',
                                    '--datatier':'NANOAOD',
                                    '--eventcontent':'NANOAOD'}])
 
+steps['EGMNano_data13.0'] = merge([{'-s':'NANO:@EGM,DQM:@EGM',
+                   '--process':'NANO',
+                   #'--mc':'',
+                   '--eventcontent':'NANOAOD,DQM',
+                   '--datatier':'NANOAOD,DQMIO',
+                   '-n':'1000'}])
+
 ###current release cycle workflows : 13.2
 steps['TTBarMINIAOD13.2'] = {'INPUT':InputInfo(location='STD',
                                                ## dataset below to be replaced with a 13.2 relval sample when available

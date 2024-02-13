@@ -288,3 +288,5 @@ def nanoL1TrigObjCustomizeFull(process):
 from DPGAnalysis.MuonTools.muNtupleProducer_cff import *
 from DPGAnalysis.MuonTools.muNtupleProducerBkg_cff import *
 
+#EGM POG customize function
+from PhysicsTools.NanoAOD.egamma_custom_cff import addExtraEGammaVarsCustomize
