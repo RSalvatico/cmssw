@@ -19,9 +19,7 @@ _boostedTauPlotsV10.extend([
 )
 
 ## EGamma custom nano
-_Electron_extra_plots = cms.VPSet()
-for plot in nanoDQM.vplots.Electron.plots:
-    _Electron_extra_plots.append(plot)
+_Electron_extra_plots = nanoDQM.vplots.Electron.plots.copy()
 _Electron_extra_plots.extend([
     Plot1D('r9Frac', 'r9Frac', 22, 0, 1.1, 'Fractional R9'),
     Plot1D('DeltaEtaInSC', 'DeltaEtaInSC', 20, -0.01, 0.01, 'DEta trk and SuperClus'),
@@ -42,7 +40,6 @@ _Electron_extra_plots.extend([
     Plot1D('ecalPFClusIso', 'ecalPFClusIso', 20, 0, 40, 'ecal PF Cluster Isolation'),
     Plot1D('hcalPFClusIso', 'hcalPFClusIso', 20, 0, 40, 'hcal PF Cluster Isolation'),
     Plot1D('nBrem', 'nBrem', 20, 0, 19, 'num of Brem'),
-    Plot1D('rawPreshowerEnergy', 'rawPreshowerEnergy', 20, 0, 80, 'rawPreshowerEnergy'),
     Plot1D('pfPhotonIso', 'pfPhotonIso', 20, 0, 20, 'pf Photon Isolation'),
     Plot1D('pfChargedHadIso', 'pfChargedHadIso', 20, 0, 40, 'pf Charged Hadron Isolation'),
     Plot1D('pfNeutralHadIso', 'pfNeutralHadIso', 20, 0, 40, 'pfNeutralHadIso'),
@@ -85,12 +82,9 @@ _Electron_extra_plots.extend([
     Plot1D('iPhiMod20', 'iPhiMod20', 100, 0, 99, 'iPhiMod20')
 ])
 
-_Photon_extra_plots = cms.VPSet()
-for plot in nanoDQM.vplots.Photon.plots:
-    _Photon_extra_plots.append(plot)
+_Photon_extra_plots = nanoDQM.vplots.Photon.plots.copy()
 _Photon_extra_plots.extend([
     Plot1D('r9Frac', 'r9Frac', 22, 0, 1.1, 'Fractional R9'),
-    Plot1D('superclusterEta', 'superclusterEta', 30, 3.0, 3.0, 'supercluster Eta'),
     Plot1D('energy', 'energy', 20, 0, 80, 'energy'),
     Plot1D('rawPreshowerEnergy', 'rawPreshowerEnergy', 20, 0, 80, 'rawPreshowerEnergy'),
     Plot1D('seedClusEnergy', 'seedClusEnergy', 20, 0, 40, 'seedClusEnergy'),
@@ -113,25 +107,12 @@ _Photon_extra_plots.extend([
     Plot1D('hadTowOverEm', 'hadTowOverEm', 20, 0, 0.2, 'Single Tower H/E'),
     Plot1D('ecalRecHitIsolation', 'ecalRecHitIsolation', 20, 0, 40, 'ecal RecHit Isolation'),
     Plot1D('sigmaIetaIetaFrac', 'sigmaIetaIetaFrac', 20, 0, 0.08, 'sigmaIetaIetaFrac'),
-    Plot1D('ecalPFClusterIso', 'ecalPFClusterIso', 20, 0, 40, 'ecal PF Cluster Isolation'),
-    Plot1D('hcalPFClusIso', 'hcalPFClusIso', 20, 0, 40, 'hcal PF Cluster Isolation'),
     Plot1D('chargedHadronIso', 'chargedHadronIso', 20, 0, 40, 'chargedHadronIso'),
-    Plot1D('trkSumPtSolidConeDR04', 'trkSumPtSolidConeDR04', 20, 0, 40, 'trkSumPtSolidConeDR04'),
     Plot1D('iEtaMod5', 'iEtaMod5', 20, 0, 40, 'iEtaMod5'),
     Plot1D('iEtaMod20', 'iEtaMod20', 20, 0, 40, 'iEtaMod20'),
     Plot1D('iPhiMod2', 'iPhiMod2', 20, 0, 199, 'iPhiMod2'),
     Plot1D('iPhiMod20', 'iPhiMod20', 100, 0, 99, 'iPhiMod20')
 ])
-
-# from Configuration.ProcessModifiers.egmCustomNano_cff import egmCustomNano
-# (egmCustomNano).toModify(
-#     nanoDQM.vplots.Electron,
-#     plots = _Electron_extra_plots
-# )
-# (egmCustomNano).toModify(
-#     nanoDQM.vplots.Photon,
-#     plots = _Photon_extra_plots
-# )
 
 _Electron_Run2_plots = cms.VPSet()
 for plot in nanoDQM.vplots.Electron.plots:

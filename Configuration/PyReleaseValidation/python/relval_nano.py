@@ -166,11 +166,19 @@ steps['muDPGNANOBkg_data13.0']=merge([{'-s' : 'RAW2DIGI,NANO:@MUDPGBKG',
                                    '--datatier':'NANOAOD',
                                    '--eventcontent':'NANOAOD'}])
 
-steps['EGMNano_data13.0'] = merge([{'-s':'NANO:@EGM,DQM:@EGM',
-                   '--process':'NANO',
-                   #'--mc':'',
-                   '--eventcontent':'NANOAOD,DQM',
-                   '--datatier':'NANOAOD,DQMIO',
+steps['EGMNano_data13.0'] = merge([{'-s':'NANO:@EGM',
+                   '--era':'Run3',
+                   '--conditions':'auto:run3_data'
+                   '--eventcontent':'NANOAOD',
+                   '--datatier':'NANOAOD',
+                   '-n':'1000'}])
+
+steps['EGMNano_mc13.0'] = merge([{'-s':'NANO:@EGM',
+                   '--era':'Run3',
+                   '--conditions':'130X_mcRun3_2022_realistic_v2'
+                   '--eventcontent':'NANOAODSIM',
+                   '--mc' : '',
+                   '--datatier':'NANOAODSIM',
                    '-n':'1000'}])
 
 ###current release cycle workflows : 13.2
@@ -237,6 +245,8 @@ workflows[_wfn()] = ['NANOdata130Xrun3', ['MuonEG2023MINIAOD13.0', 'NANO_data13.
 workflows[_wfn()] = ['NANOdata130Xrun3', ['MuonEG2023MINIAOD13.0', 'NANO_data13.0_prompt', 'HRV_NANO_data']]
 workflows[_wfn()] = ['muDPGNANO130Xrun3', ['ZMuSkim2023DRAWRECO13.0', 'muDPGNANO_data13.0']]
 workflows[_wfn()] = ['muDPGNANOBkg130Xrun3', ['ZeroBias2023DRAW13.0', 'muDPGNANOBkg_data13.0']]
+workflows[_wfn()] = ['EGMNANOdata130Xrun3', ['MuonEG2023MINIAOD13.0', 'EGMNano_data13.0']]
+workflows[_wfn()] = ['EGMNANOmc130X', ['TTBarMINIAOD13.0', 'EGMNano_mc13.0']]
 
 _wfn.next()
 ################
