@@ -166,20 +166,11 @@ steps['muDPGNANOBkg_data13.0']=merge([{'-s' : 'RAW2DIGI,NANO:@MUDPGBKG',
                                    '--datatier':'NANOAOD',
                                    '--eventcontent':'NANOAOD'}])
 
-steps['EGMNano_data13.0'] = merge([{'-s':'NANO:@EGM',
-                   '--era':'Run3',
-                   '--conditions':'auto:run3_data'
-                   '--eventcontent':'NANOAOD',
-                   '--datatier':'NANOAOD',
-                   '-n':'1000'}])
+steps['EGMNano_data13.0'] = merge([{'-s':'NANO:@EGM', '-n' : '1000'},
+                                    steps['NANO_data13.0']])
 
-steps['EGMNano_mc13.0'] = merge([{'-s':'NANO:@EGM',
-                   '--era':'Run3',
-                   '--conditions':'130X_mcRun3_2022_realistic_v2'
-                   '--eventcontent':'NANOAODSIM',
-                   '--mc' : '',
-                   '--datatier':'NANOAODSIM',
-                   '-n':'1000'}])
+steps['EGMNano_mc13.0'] = merge([{'-s':'NANO:@EGM', '-n' : '1000'},
+                                 steps['NANO_mc13.0']])
 
 ###current release cycle workflows : 13.2
 steps['TTBarMINIAOD13.2'] = {'INPUT':InputInfo(location='STD',
@@ -189,6 +180,9 @@ steps['TTBarMINIAOD13.2'] = {'INPUT':InputInfo(location='STD',
 steps['NANO_mc13.2']=merge([{'--era':'Run3',
                              '--conditions':'auto:phase1_2022_realistic'},
                             _NANO_mc])
+
+steps['EGMNano_mc13.2'] = merge([{'-s':'NANO:@EGM', '-n' : '1000'},
+                                 steps['NANO_mc13.2']])
 
 ##13.X INPUT
 steps['RunScoutingPFRun32022D13.X']={'INPUT':InputInfo(dataSet='/ScoutingPFRun3/Run2022D-v1/RAW',label='2022D',events=100000,location='STD', ls=Run2022D)}
@@ -252,6 +246,7 @@ _wfn.next()
 ################
 #13.2 workflows
 workflows[_wfn()] = ['NANOmc132X', ['TTBarMINIAOD13.2', 'NANO_mc13.2', 'HRV_NANO_mc']]
+workflows[_wfn()] = ['EGMNANOmc132X', ['TTBarMINIAOD13.2', 'EGMNano_mc13.2']]
 
 _wfn.next()
 ################
