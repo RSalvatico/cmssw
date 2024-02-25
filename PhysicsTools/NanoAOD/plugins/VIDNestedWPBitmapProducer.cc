@@ -75,6 +75,7 @@ public:
         isInit_(false) {
     auto const& vwp = iConfig.getParameter<std::vector<std::string>>("WorkingPoints");
     for (auto const& wp : vwp) {
+      std::cout << wp << std::endl;
       src_bitmaps_.push_back(consumes<edm::ValueMap<unsigned int>>(edm::InputTag(wp + std::string("Bitmap"))));
       src_cutflows_.push_back(consumes<edm::ValueMap<vid::CutFlowResult>>(edm::InputTag(wp)));
     }
@@ -107,7 +108,6 @@ template <typename T>
 void VIDNestedWPBitmapProducer<T>::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
   edm::Handle<edm::View<T>> src;
   iEvent.getByToken(src_, src);
-
   auto srcForIDHandle = iEvent.getHandle(srcForIDToken_);
 
   std::vector<edm::Handle<edm::ValueMap<unsigned int>>> src_bitmaps(nWP);

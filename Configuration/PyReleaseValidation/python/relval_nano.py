@@ -166,10 +166,10 @@ steps['muDPGNANOBkg_data13.0']=merge([{'-s' : 'RAW2DIGI,NANO:@MUDPGBKG',
                                    '--datatier':'NANOAOD',
                                    '--eventcontent':'NANOAOD'}])
 
-steps['EGMNano_data13.0'] = merge([{'-s':'NANO:@EGM', '-n' : '1000'},
+steps['EGMNano_data13.0'] = merge([{'-s':'NANO:@EGMPOG,DQM:@nanoAODDQM', '-n' : '1000'},
                                     steps['NANO_data13.0']])
 
-steps['EGMNano_mc13.0'] = merge([{'-s':'NANO:@EGM', '-n' : '1000'},
+steps['EGMNano_mc13.0'] = merge([{'-s':'NANO:@EGMPOG,DQM:@nanoAODDQM', '-n' : '1000'},
                                  steps['NANO_mc13.0']])
 
 ###current release cycle workflows : 13.2
@@ -181,7 +181,7 @@ steps['NANO_mc13.2']=merge([{'--era':'Run3',
                              '--conditions':'auto:phase1_2022_realistic'},
                             _NANO_mc])
 
-steps['EGMNano_mc13.2'] = merge([{'-s':'NANO:@EGM', '-n' : '1000'},
+steps['EGMNano_mc13.2'] = merge([{'-s':'NANO:@EGMPOG,DQM:@nanoAODDQM', '-n' : '1000'},
                                  steps['NANO_mc13.2']])
 
 ##13.X INPUT

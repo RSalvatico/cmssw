@@ -23,10 +23,10 @@ electron_id_modules_WorkingPoints_nanoAOD = cms.PSet(
         'RecoEgamma.ElectronIdentification.Identification.mvaElectronID_RunIIIWinter22_noIso_V1_cff',
     ),
     WorkingPoints = cms.vstring(
-        "egmGsfElectronIDs:cutBasedElectronID-RunIIIWinter22-V1-veto",
-        "egmGsfElectronIDs:cutBasedElectronID-RunIIIWinter22-V1-loose",
-        "egmGsfElectronIDs:cutBasedElectronID-RunIIIWinter22-V1-medium",
-        "egmGsfElectronIDs:cutBasedElectronID-RunIIIWinter22-V1-tight",
+        #"egmGsfElectronIDs:cutBasedElectronID-RunIIIWinter22-V1-veto",
+        #"egmGsfElectronIDs:cutBasedElectronID-RunIIIWinter22-V1-loose",
+        #"egmGsfElectronIDs:cutBasedElectronID-RunIIIWinter22-V1-medium",
+        #"egmGsfElectronIDs:cutBasedElectronID-RunIIIWinter22-V1-tight",
     )
 )
 
