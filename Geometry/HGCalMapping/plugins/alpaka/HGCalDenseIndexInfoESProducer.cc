@@ -41,7 +41,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         cellInfoTkn_ = cc.consumes(iConfig.getParameter<edm::ESInputTag>("cellinfo"));
         caloGeomToken_ = cc.consumes();
       }
-
+      int count = 0;
       //
       static void fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
         edm::ParameterSetDescription desc;
@@ -107,6 +107,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
               row.chNumber() = ich;
               row.modInfoIdx() = modIdx;
               uint32_t cellIdx = cellInfoOffset + ich;
+              std::cout << "cellIdx: " << cellIdx << std::endl;
+              count++;
+              std::cout << "Count index: " << count << std::endl;
               row.cellInfoIdx() = cellIdx;
 
               auto cell_row = cellInfo.view()[cellIdx];

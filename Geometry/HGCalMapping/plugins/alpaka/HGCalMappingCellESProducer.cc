@@ -30,33 +30,69 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     public:
       //
       HGCalMappingCellESProducer(const edm::ParameterSet& iConfig)
-          : ESProducer(iConfig), filelist_(iConfig.getParameter<std::vector<std::string> >("filelist")) {
+          : ESProducer(iConfig),
+            filelist_(iConfig.getParameter<std::vector<std::string> >("filelist")),
+            offsetfile_(iConfig.getParameter<std::string>("offsetfile")) {
         auto cc = setWhatProduced(this);
         cellIndexTkn_ = cc.consumes(iConfig.getParameter<edm::ESInputTag>("cellindexer"));
       }
-
+      int count = 0;
       //
       static void fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
         edm::ParameterSetDescription desc;
         desc.add<std::vector<std::string> >("filelist", std::vector<std::string>({}))
             ->setComment("list of files with the readout cells of each module");
+        desc.add<std::string>("offsetfile", std::string({}))
+            ->setComment("file containing the offsets between calibration and surrounding cells");
         desc.add<edm::ESInputTag>("cellindexer", edm::ESInputTag(""))->setComment("Dense cell index tool");
         descriptions.addWithDefaultLabel(desc);
       }
 
-      //
+      std::map<std::tuple<std::string, int, int>, int> makeOffsetMap(std::string input_offsetfile) {
+        std::map<std::tuple<std::string, int, int>, int> offsetMap;
+        auto offsetfile = edm::FileInPath(input_offsetfile).fullPath();
+        std::ifstream stream_offsetfile(offsetfile);
+        std::string line;
+        // Skip the first line (description of column content)
+        std::getline(stream_offsetfile, line);
+        while (std::getline(stream_offsetfile, line)) {
+          std::istringstream iss(line);
+          std::string r_typecode_str, r_chip_str, r_half_str, offset_str;
+          if (!(iss >> r_typecode_str >> r_chip_str >> r_half_str >> offset_str)) {
+            std::cout << "Error reading offset file" << std::endl;
+            break;
+          }
+          try {
+            int r_chip = std::stoi(r_chip_str);
+            int r_half = std::stoi(r_half_str);
+            int offset = std::stoi(offset_str);
+            offsetMap[std::make_tuple(r_typecode_str, r_chip, r_half)] = offset;
+          } catch (const std::invalid_argument& e) {
+            std::cout << "Invalid argument: " << e.what() << std::endl;
+            break;
+          } catch (const std::out_of_range& e) {
+            std::cout << "Out of range: " << e.what() << std::endl;
+            break;
+          }
+        }
+        return offsetMap;
+      }
+
       std::optional<HGCalMappingCellParamHost> produce(const HGCalElectronicsMappingRcd& iRecord) {
         //get cell indexer
         const HGCalMappingCellIndexer& cellIndexer = iRecord.get(cellIndexTkn_);
         const uint32_t size = cellIndexer.maxDenseIndex();  // channel-level size
+        std::cout << "Size: " << size << std::endl;
         HGCalMappingCellParamHost cellParams(size, cms::alpakatools::host());
         for (uint32_t i = 0; i < size; i++)
           cellParams.view()[i].valid() = false;
 
+        auto offsetMap = makeOffsetMap(offsetfile_);
+
         //loop over cell types and then over cells
         for (const auto& url : filelist_) {
           ::hgcal::mappingtools::HGCalEntityList pmap;
-          edm::FileInPath fip(url);
+          edm::FileInPath fip(url); 
           pmap.buildFrom(fip.fullPath());
           auto& entities = pmap.getEntries();
           for (auto row : entities) {
@@ -88,11 +124,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
               DetId::Detector det(DetId::Detector::HGCalEE);
               detid = 0x3ff & HGCSiliconDetId(det, 0, 0, 0, 0, 0, i1, i2).rawId();
             }
-
             //fill cell info in the appopriate dense index
             int chip = pmap.getIntAttr("ROC", row);
             int half = pmap.getIntAttr("HalfROC", row);
             int seq = pmap.getIntAttr("Seq", row);
+            //int offset = pmap.getIntAttr("Offset", row); //Calibration cell to surrounding cell offset
             int idx = cellIndexer.denseIndex(typecode, chip, half, seq);
             auto cell = cellParams.view()[idx];
             cell.valid() = true;
@@ -113,6 +149,17 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
             cell.trace() = pmap.getFloatAttr("trace", row);
             cell.eleid() = HGCalElectronicsId(false, 0, 0, 0, chip * 2 + half, seq).raw();
             cell.detid() = detid;
+
+            //read outer cell-to-surrounding cell offset
+            int offset = 0;
+            auto mapKey = std::make_tuple(typecode, chip, half);
+            if (offsetMap.find(mapKey) != offsetMap.end()) {
+              offset = offsetMap[mapKey];
+              std::cout << "Offset for " << typecode << " " << chip << " " << half << " is " << offset << std::endl;
+            }
+            count++;
+            std::cout << "Count offset: " << count << std::endl;
+            cell.offset() = offset;
           }  //end loop over entities
         }  //end loop over cell types
 
@@ -122,6 +169,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     private:
       edm::ESGetToken<HGCalMappingCellIndexer, HGCalElectronicsMappingRcd> cellIndexTkn_;
       const std::vector<std::string> filelist_;
+      std::string offsetfile_;
     };
 
   }  // namespace hgcal

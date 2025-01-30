@@ -99,6 +99,7 @@ void HGCalMappingESSourceTester::analyze(const edm::Event& iEvent, const edm::Ev
 
   //printout and test module cells SoA contents
   uint32_t ncells = cells.view().metadata().size();
+  printf("[HGCalMappingIndexESSourceTester]ncells %d\n", ncells);
   uint32_t validCells = 0;
   assert(ncells == cellIdx.maxDenseIndex());  //check for consistent size
   printf("[HGCalMappingIndexESSourceTester][analyze] Module cell mapping contents\n");

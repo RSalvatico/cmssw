@@ -9,6 +9,8 @@ options.register('sicells','Geometry/HGCalMapping/data/CellMaps/WaferCellMapTrac
                  info="Path to Si cell mapper. Absolute, or relative to CMSSW src directory")
 options.register('sipmcells','Geometry/HGCalMapping/data/CellMaps/channels_sipmontile.hgcal.txt',mytype=VarParsing.varType.string,
                  info="Path to SiPM-on-tile cell mapper. Absolute, or relative to CMSSW src directory")
+options.register('offsetfile','HGCalCommissioning/SystemTestEventFilters/test/offsetMap.txt',mytype=VarParsing.varType.string,
+                 info="Path to calibration-to-surrounding cell offset map. Absolute, or relative to CMSSW src directory")
 options.parseArguments()
 
 process.source = cms.Source('EmptySource')
@@ -22,10 +24,12 @@ from Geometry.HGCalMapping.hgcalmapping_cff import customise_hgcalmapper
 process = customise_hgcalmapper(process,
                                 modules=options.modules,
                                 sicells=options.sicells,
-                                sipmcells=options.sipmcells)
+                                sipmcells=options.sipmcells,
+                                offsetfile=options.offsetfile)
 
 #Geometry
-process.load('Configuration.Geometry.GeometryExtended2026D99Reco_cff')
+#process.load('Configuration.Geometry.GeometryExtended2026D99Reco_cff')
+process.load('Configuration.Geometry.GeometryExtendedRun4D101Reco_cff')
 
 #tester
 process.tester = cms.EDAnalyzer('HGCalMappingESSourceTester')
