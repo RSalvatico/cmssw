@@ -92,7 +92,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     auto const& hostDigisIn = iEvent.get(digisToken_);
 
     //printout new conditions if available
-    std::cout << "calib size: " << deviceCalibParamProvider.view().metadata().size() << " mapping size: " << deviceMappingCellParamProvider.view().metadata().size() << std::endl;
     LogDebug("HGCalCalibrationParameter").log([&](auto& log) {
       if (calibWatcher_.check(iSetup)) {
         for (int i = 0; i < deviceConfigParamProvider.view().metadata().size(); i++) {

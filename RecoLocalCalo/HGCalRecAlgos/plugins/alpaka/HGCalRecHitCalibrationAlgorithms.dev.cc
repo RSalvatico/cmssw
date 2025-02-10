@@ -108,7 +108,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     }
   };
 
-  struct HGCalRecHitCalibrationKernel_sumEnergyCalib {
+  struct HGCalRecHitCalibrationKernel_handleCalibCell {
     ALPAKA_FN_ACC void operator()(Acc1D const& acc,
                                   HGCalDigiDevice::View digis,
                                   HGCalRecHitDevice::View recHits,
@@ -116,23 +116,27 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                   HGCalMappingCellParamDevice::ConstView maps,
                                   HGCalDenseIndexInfoDevice::ConstView index) const {
 
-      for (auto idx : uniform_elements(acc, digis.metadata().size())) {
+      for (auto idx : uniform_elements(acc, recHits.metadata().size())) {
         auto calib = calibs[idx];
         bool calibvalid = calib.valid();
         auto digi = digis[idx];
         auto digiflags = digi.flags();
         bool isAvailable((digiflags != ::hgcal::DIGI_FLAG::Invalid) && (digiflags != ::hgcal::DIGI_FLAG::NotAvailable) &&
                          calibvalid);
-        bool isCalibCell(maps.iscalib());
-        int offset = *(maps.offset());
+        auto cellIndex = index[idx].cellInfoIdx(); //Retrieve cellInfoIdx from the dense index
+        //printf("cellIndex: %d\n", cellIndex);
+        //bool isValidCell(maps[cellIndex].valid());
+        bool isCalibCell(maps[cellIndex].iscalib());
+        int offset = maps[cellIndex].offset();
+
+        
         if(isCalibCell){
           printf("recHits[preSum]: %f\n", recHits[idx+offset].energy());
-        //  std::cout << "recHits[preSum]: " << recHits[idx+offset].energy() << std::endl; 
         }
+        //recHits[idx+offset].energy() += (recHits[idx].energy() * isCalibCell * isValidCell);
         recHits[idx+offset].energy() += (recHits[idx].energy() * isAvailable * isCalibCell);
         if(isCalibCell){
           printf("%d\t%f\t%f\n",offset, recHits[idx].energy(), recHits[idx+offset].energy());
-        //  std::cout << "offset: " << offset << " recHits[calib]: " << recHits[idx].energy() << " recHits[idx+offset]: " << recHits[idx+offset].energy() << std::endl;
         }
       }
     }
@@ -165,7 +169,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     LogDebug("HGCalRecHitCalibrationAlgorithms")
         << "\n\nINFO -- Allocating rechits buffer and initiating values" << std::endl;
     HGCalRecHitDevice device_recHits(device_digis.view().metadata().size(), queue);
-    printf("runno sta roba %i\n", (device_index.view().metadata().size()));
 
     alpaka::exec<Acc1D>(queue,
                         grid,
@@ -173,23 +176,20 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                         device_digis.view(),
                         device_recHits.view(),
                         device_calib.view());
-    printf("runno sta roba 2\n");
     alpaka::exec<Acc1D>(queue,
                         grid,
                         HGCalRecHitCalibrationKernel_adcToCharge{},
                         device_digis.view(),
                         device_recHits.view(),
-                        device_calib.view());
-    printf("runno sta roba 3\n");                    
-    alpaka::exec<Acc1D>(queue, //Before or after adcToCharge?
+                        device_calib.view());             
+    alpaka::exec<Acc1D>(queue,
                         grid,
-                        HGCalRecHitCalibrationKernel_sumEnergyCalib{},
+                        HGCalRecHitCalibrationKernel_handleCalibCell{},
                         device_digis.view(),
                         device_recHits.view(),
                         device_calib.view(),
                         device_mapping.view(),
                         device_index.view());
-    printf("runno sta roba 4\n");
     alpaka::exec<Acc1D>(queue,
                         grid,
                         HGCalRecHitCalibrationKernel_toaToTime{},

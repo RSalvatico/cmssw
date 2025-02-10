@@ -36,7 +36,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         auto cc = setWhatProduced(this);
         cellIndexTkn_ = cc.consumes(iConfig.getParameter<edm::ESInputTag>("cellindexer"));
       }
-      int count = 0;
       //
       static void fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
         edm::ParameterSetDescription desc;
@@ -82,7 +81,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         //get cell indexer
         const HGCalMappingCellIndexer& cellIndexer = iRecord.get(cellIndexTkn_);
         const uint32_t size = cellIndexer.maxDenseIndex();  // channel-level size
-        std::cout << "Size: " << size << std::endl;
         HGCalMappingCellParamHost cellParams(size, cms::alpakatools::host());
         for (uint32_t i = 0; i < size; i++)
           cellParams.view()[i].valid() = false;
@@ -128,7 +126,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
             int chip = pmap.getIntAttr("ROC", row);
             int half = pmap.getIntAttr("HalfROC", row);
             int seq = pmap.getIntAttr("Seq", row);
-            //int offset = pmap.getIntAttr("Offset", row); //Calibration cell to surrounding cell offset
             int idx = cellIndexer.denseIndex(typecode, chip, half, seq);
             auto cell = cellParams.view()[idx];
             cell.valid() = true;
@@ -150,15 +147,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
             cell.eleid() = HGCalElectronicsId(false, 0, 0, 0, chip * 2 + half, seq).raw();
             cell.detid() = detid;
 
-            //read outer cell-to-surrounding cell offset
-            int offset = 0;
+            //calibration cell-to-surrounding cell offset. Can be !=0 only for calibration cells
             auto mapKey = std::make_tuple(typecode, chip, half);
-            if (offsetMap.find(mapKey) != offsetMap.end()) {
-              offset = offsetMap[mapKey];
-              std::cout << "Offset for " << typecode << " " << chip << " " << half << " is " << offset << std::endl;
-            }
-            count++;
-            std::cout << "Count offset: " << count << std::endl;
+            int offset = (iscalib && offsetMap.find(mapKey) != offsetMap.end()) ? offsetMap[mapKey] : 0;
             cell.offset() = offset;
           }  //end loop over entities
         }  //end loop over cell types
