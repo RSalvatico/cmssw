@@ -28,9 +28,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         auto digi = digis[idx];
         auto digiflags = digi.flags();
         //recHits[idx].flags() = digiflags;
-        bool isAvailable((digiflags != hgcal::DIGI_FLAG::Invalid) && (digiflags != hgcal::DIGI_FLAG::NotAvailable) &&
+        bool isAvailable((digiflags != ::hgcal::DIGI_FLAG::Invalid) && (digiflags != ::hgcal::DIGI_FLAG::NotAvailable) &&
                          calibvalid);
-        bool isToAavailable((digiflags != hgcal::DIGI_FLAG::ZS_ToA) && (digiflags != hgcal::DIGI_FLAG::ZS_ToA_ADCm1));
+        bool isToAavailable((digiflags != ::hgcal::DIGI_FLAG::ZS_ToA) && (digiflags != ::hgcal::DIGI_FLAG::ZS_ToA_ADCm1));
         recHits[idx].flags() = (!isAvailable) * hgcalrechit::HGCalRecHitFlags::EnergyInvalid +
                                (!isToAavailable) * hgcalrechit::HGCalRecHitFlags::TimeInvalid;
       }
@@ -61,7 +61,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         bool calibvalid = calib.valid();
         auto digi = digis[idx];
         auto digiflags = digi.flags();
-        bool isAvailable((digiflags != hgcal::DIGI_FLAG::Invalid) && (digiflags != hgcal::DIGI_FLAG::NotAvailable) &&
+        bool isAvailable((digiflags != ::hgcal::DIGI_FLAG::Invalid) && (digiflags != ::hgcal::DIGI_FLAG::NotAvailable) &&
                          calibvalid);
         bool useTOT((digi.tctp() == 3) && isAvailable);
         bool useADC(!useTOT && isAvailable);
@@ -99,15 +99,56 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         bool calibvalid = calib.valid();
         auto digi = digis[idx];
         auto digiflags = digi.flags();
-        bool isAvailable((digiflags != hgcal::DIGI_FLAG::Invalid) && (digiflags != hgcal::DIGI_FLAG::NotAvailable) &&
+        bool isAvailable((digiflags != ::hgcal::DIGI_FLAG::Invalid) && (digiflags != ::hgcal::DIGI_FLAG::NotAvailable) &&
                          calibvalid);
-        bool isToAavailable((digiflags != hgcal::DIGI_FLAG::ZS_ToA) && (digiflags != hgcal::DIGI_FLAG::ZS_ToA_ADCm1));
+        bool isToAavailable((digiflags != ::hgcal::DIGI_FLAG::ZS_ToA) && (digiflags != ::hgcal::DIGI_FLAG::ZS_ToA_ADCm1));
         bool isGood(isAvailable && isToAavailable);
         recHits[idx].time() = isGood * toa_to_ps(digi.toa(), calib.TOAtops());
       }
     }
   };
 
+  //
+  struct HGCalRecHitCalibrationKernel_handleCalibCell {
+    ALPAKA_FN_ACC void operator()(Acc1D const& acc,
+                                  HGCalDigiDevice::View digis,
+                                  HGCalRecHitDevice::View recHits,
+                                  HGCalCalibParamDevice::ConstView calibs,
+                                  HGCalMappingCellParamDevice::ConstView maps,
+                                  HGCalDenseIndexInfoDevice::ConstView index) const {
+
+      auto time_average = [&](float time_surr, float time_calib, float energy_surr, float energy_calib) {
+        bool is_time_surr(time_surr > 0);
+        bool is_time_calib(time_calib > 0);
+        float totalEn = (is_time_surr * energy_surr  + is_time_calib * energy_calib );
+        float weighted_average = 0. + (totalEn > 0) * (is_time_surr * energy_surr * time_surr + is_time_calib * energy_calib * time_calib) / totalEn;
+        return weighted_average;
+      };
+
+      for (auto idx : uniform_elements(acc, digis.metadata().size())) {
+        auto calib = calibs[idx];
+        bool calibvalid = calib.valid();
+        auto digi = digis[idx];
+        auto digiflags = digi.flags();
+        bool isAvailable((digiflags != ::hgcal::DIGI_FLAG::Invalid) && (digiflags != ::hgcal::DIGI_FLAG::NotAvailable) &&
+                         calibvalid);
+        bool isToAavailable((digiflags != ::hgcal::DIGI_FLAG::ZS_ToA) && (digiflags != ::hgcal::DIGI_FLAG::ZS_ToA_ADCm1));
+        bool isGood(isAvailable && isToAavailable);
+        auto cellIndex = index[idx].cellInfoIdx(); //Retrieve cellInfoIdx from the dense index
+        bool isCalibCell(maps[cellIndex].iscalib());
+        int offset = maps[cellIndex].offset();
+        
+        //If the cell is a calibration cell, average the time and add the energy to the surrounding cells
+        recHits[idx+offset].time() = isGood * isCalibCell * time_average(recHits[idx+offset].time(),
+                                                                         recHits[idx].time(),
+                                                                         recHits[idx+offset].energy(),
+                                                                         recHits[idx].energy());
+                                                                         
+        recHits[idx+offset].energy() += (recHits[idx].energy() * isAvailable * isCalibCell);
+      }
+    }
+  };
+  
   struct HGCalRecHitCalibrationKernel_printRecHits {
     ALPAKA_FN_ACC void operator()(Acc1D const& acc, HGCalRecHitDevice::ConstView view, int size) const {
       for (int i = 0; i < size; ++i) {
@@ -120,7 +161,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   HGCalRecHitDevice HGCalRecHitCalibrationAlgorithms::calibrate(Queue& queue,
                                                                 HGCalDigiHost const& host_digis,
                                                                 HGCalCalibParamDevice const& device_calib,
-                                                                HGCalConfigParamDevice const& device_config) const {
+                                                                HGCalConfigParamDevice const& device_config,
+								HGCalMappingCellParamDevice const& device_mapping,
+                                                                HGCalDenseIndexInfoDevice const& device_index) const {
     LogDebug("HGCalRecHitCalibrationAlgorithms") << "\n\nINFO -- Start of calibrate\n\n" << std::endl;
 
     LogDebug("HGCalRecHitCalibrationAlgorithms") << "\n\nINFO -- Copying the digis to the device\n\n" << std::endl;
@@ -159,6 +202,14 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                         device_digis.view(),
                         device_recHits.view(),
                         device_calib.view());
+    alpaka::exec<Acc1D>(queue,
+                        grid,
+                        HGCalRecHitCalibrationKernel_handleCalibCell{},
+                        device_digis.view(),
+                        device_recHits.view(),
+                        device_calib.view(),
+                        device_mapping.view(),
+                        device_index.view());
 
     LogDebug("HGCalRecHitCalibrationAlgorithms") << "Input recHits: " << std::endl;
 #ifdef EDM_ML_DEBUG
