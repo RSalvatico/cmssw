@@ -21,18 +21,23 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     ALPAKA_FN_ACC void operator()(Acc1D const& acc,
                                   HGCalDigiDevice::View digis,
                                   HGCalRecHitDevice::View recHits,
-                                  HGCalCalibParamDevice::ConstView calibs) const {
+                                  HGCalCalibParamDevice::ConstView calibs,
+                                  HGCalMappingCellParamDevice::ConstView maps,
+                                  HGCalDenseIndexInfoDevice::ConstView index) const {
       for (auto idx : uniform_elements(acc, digis.metadata().size())) {
         auto calib = calibs[idx];
         bool calibvalid = calib.valid();
         auto digi = digis[idx];
         auto digiflags = digi.flags();
-        //recHits[idx].flags() = digiflags;
         bool isAvailable((digiflags != ::hgcal::DIGI_FLAG::Invalid) && (digiflags != ::hgcal::DIGI_FLAG::NotAvailable) &&
                          calibvalid);
         bool isToAavailable((digiflags != ::hgcal::DIGI_FLAG::ZS_ToA) && (digiflags != ::hgcal::DIGI_FLAG::ZS_ToA_ADCm1));
         recHits[idx].flags() = (!isAvailable) * hgcalrechit::HGCalRecHitFlags::EnergyInvalid +
                                (!isToAavailable) * hgcalrechit::HGCalRecHitFlags::TimeInvalid;
+
+        //auto cellIndex = index[idx].cellInfoIdx(); //Retrieve cellInfoIdx from the dense index
+        //bool isCalibCell(maps[cellIndex].iscalib());
+        //int offset = maps[cellIndex].offset(); //This is an offset wrt the cellIndex, not idx
       }
     }
   };
@@ -117,16 +122,17 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                   HGCalMappingCellParamDevice::ConstView maps,
                                   HGCalDenseIndexInfoDevice::ConstView index) const {
 
+      //auto correct_negative_energy = [&](float energy_surr) {
+      //  bool is_not_energy_surr(energy_surr < 0);
+      //  return (- energy_surr) * is_not_energy_surr;
+      //};
+
       auto time_average = [&](float time_surr, float time_calib, float energy_surr, float energy_calib) {
         bool is_time_surr(time_surr > 0);
         bool is_time_calib(time_calib > 0);
-        bool is_not_time_surr = !is_time_surr;
-        bool is_not_time_calib = !is_time_calib;
-        float weighted_average = (energy_surr * time_surr + energy_calib * time_calib) / (energy_surr + energy_calib);
-        //Calibration cell or surrounding cell time could be zero, but energy coul be not. Fix the weighted average in that case
-        float recover_time_surr = is_not_time_calib * (time_surr - weighted_average);
-        float recover_time_calib = is_not_time_surr * (time_calib - weighted_average);
-        return weighted_average + recover_time_surr + recover_time_calib;
+        float totalEn = (is_time_surr * energy_surr  + is_time_calib * energy_calib );
+        float weighted_average = (totalEn > 0) ? ((is_time_surr * energy_surr * time_surr + is_time_calib * energy_calib * time_calib) / totalEn) - time_surr : 0.0f - time_surr;
+        return weighted_average;
       };
 
       for (auto idx : uniform_elements(acc, digis.metadata().size())) {
@@ -138,17 +144,38 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                          calibvalid);
         bool isToAavailable((digiflags != ::hgcal::DIGI_FLAG::ZS_ToA) && (digiflags != ::hgcal::DIGI_FLAG::ZS_ToA_ADCm1));
         bool isGood(isAvailable && isToAavailable);
-        auto cellIndex = index[idx].cellInfoIdx(); //Retrieve cellInfoIdx from the dense index
-        bool isCalibCell(maps[cellIndex].iscalib());
-        int offset = maps[cellIndex].offset();
-        
-        //If the cell is a calibration cell, average the time and add the energy to the surrounding cells
-        recHits[idx+offset].time() = isGood * isCalibCell * time_average(recHits[idx+offset].time(),
-                                                                         recHits[idx].time(),
-                                                                         recHits[idx+offset].energy(),
-                                                                         recHits[idx].energy());
 
-        recHits[idx+offset].energy() += (recHits[idx].energy() * isAvailable * isCalibCell);
+        //Retrieve cellInfoIdx from the dense index
+        auto cellIndex = index[idx].cellInfoIdx();
+        bool isCalibCell(maps[cellIndex].iscalib());
+
+        //This is an offset wrt the cellIndex, but at this level it corresponds to an offset wrt the idx
+        int offset = maps[cellIndex].offset(); 
+        bool is_surr_cell((offset != 0) && isAvailable && isCalibCell);
+
+        //Set the rechit flags to Normal (i.e. 0) for the surrounding cells
+        recHits[idx+offset].flags() = (recHits[idx+offset].flags()) | (is_surr_cell * hgcalrechit::HGCalRecHitFlags::Normal);
+
+
+        //If the cell is a calibration cell, average the time and add the energy to the surrounding cells
+        recHits[idx+offset].time() += (offset != 0) * isGood * isCalibCell * time_average(recHits[idx+offset].time(),
+                                                                                         recHits[idx].time(),
+                                                                                         recHits[idx+offset].energy(),
+                                                                                         recHits[idx].energy());
+
+        //Careful not to assign the energy to the calibration cell itself
+        bool is_negative_surr_energy(recHits[idx+offset].energy() < 0); //Is this thread-safe? Is any access to idx+offset thread-safe?
+
+        
+        //auto calib_energy_to_sum = recHits[idx].energy() * is_surr_cell;
+        //auto negative_energy_correction = (-1.0 * recHits[idx+offset].energy()) * is_surr_cell * is_negative_surr_energy;
+
+        //alpaka::atomicAdd(acc, &recHits[idx+offset].energy(), negative_energy_correction, alpaka::hierarchy::Blocks{});
+        //alpaka::atomicAdd(acc, &recHits[idx+offset].energy(), calib_energy_to_sum, alpaka::hierarchy::Blocks{});
+
+        alpaka::atomicAdd(acc, &recHits[idx+offset].energy(), (-1.0 * recHits[idx+offset].energy()) * is_surr_cell * is_negative_surr_energy, alpaka::hierarchy::Blocks{});
+        alpaka::atomicAdd(acc, &recHits[idx+offset].energy(), recHits[idx].energy() * is_surr_cell, alpaka::hierarchy::Blocks{});
+        
       }
     }
   };
@@ -167,7 +194,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                                                 HGCalDigiHost const& host_digis,
                                                                 HGCalCalibParamDevice const& device_calib,
                                                                 HGCalConfigParamDevice const& device_config,
-								HGCalMappingCellParamDevice const& device_mapping,
+								                                                HGCalMappingCellParamDevice const& device_mapping,
                                                                 HGCalDenseIndexInfoDevice const& device_index) const {
     LogDebug("HGCalRecHitCalibrationAlgorithms") << "\n\nINFO -- Start of calibrate\n\n" << std::endl;
 
@@ -194,7 +221,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                         HGCalRecHitCalibrationKernel_flagRecHits{},
                         device_digis.view(),
                         device_recHits.view(),
-                        device_calib.view());
+                        device_calib.view(),
+                        device_mapping.view(),
+                        device_index.view());
     alpaka::exec<Acc1D>(queue,
                         grid,
                         HGCalRecHitCalibrationKernel_adcToCharge{},
