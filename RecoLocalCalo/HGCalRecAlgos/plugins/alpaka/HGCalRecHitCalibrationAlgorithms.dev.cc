@@ -131,7 +131,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         bool is_time_surr(time_surr > 0);
         bool is_time_calib(time_calib > 0);
         float totalEn = (is_time_surr * energy_surr  + is_time_calib * energy_calib );
-        float weighted_average = (totalEn > 0) ? ((is_time_surr * energy_surr * time_surr + is_time_calib * energy_calib * time_calib) / totalEn) - time_surr : 0.0f - time_surr;
+        float weighted_average = (totalEn > 0) ? (is_time_surr * energy_surr * time_surr + is_time_calib * energy_calib * time_calib) / totalEn : 0.0f;
         return weighted_average;
       };
 
@@ -143,7 +143,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         bool isAvailable((digiflags != ::hgcal::DIGI_FLAG::Invalid) && (digiflags != ::hgcal::DIGI_FLAG::NotAvailable) &&
                          calibvalid);
         bool isToAavailable((digiflags != ::hgcal::DIGI_FLAG::ZS_ToA) && (digiflags != ::hgcal::DIGI_FLAG::ZS_ToA_ADCm1));
-        bool isGood(isAvailable && isToAavailable);
 
         //Retrieve cellInfoIdx from the dense index
         auto cellIndex = index[idx].cellInfoIdx();
@@ -153,29 +152,28 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         int offset = maps[cellIndex].offset(); 
         bool is_surr_cell((offset != 0) && isAvailable && isCalibCell);
 
-        //Set the rechit flags to Normal (i.e. 0) for the surrounding cells
-        recHits[idx+offset].flags() = (recHits[idx+offset].flags()) | (is_surr_cell * hgcalrechit::HGCalRecHitFlags::Normal);
+        if (!is_surr_cell) {
+          continue;
+        }
 
+        //Set the rechit flags to Normal (i.e. 0) for the surrounding cells
+        //recHits[idx+offset].flags() = (recHits[idx+offset].flags()) | (is_surr_cell * hgcalrechit::HGCalRecHitFlags::Normal);
+        recHits[idx+offset].flags() = hgcalrechit::HGCalRecHitFlags::Normal;
 
         //If the cell is a calibration cell, average the time and add the energy to the surrounding cells
-        recHits[idx+offset].time() += (offset != 0) * isGood * isCalibCell * time_average(recHits[idx+offset].time(),
-                                                                                         recHits[idx].time(),
-                                                                                         recHits[idx+offset].energy(),
-                                                                                         recHits[idx].energy());
+        recHits[idx+offset].time() = isToAavailable * time_average(recHits[idx+offset].time(),
+                                                                  recHits[idx].time(),
+                                                                  recHits[idx+offset].energy(),
+                                                                  recHits[idx].energy());
 
-        //Careful not to assign the energy to the calibration cell itself
-        bool is_negative_surr_energy(recHits[idx+offset].energy() < 0); //Is this thread-safe? Is any access to idx+offset thread-safe?
+        bool is_negative_surr_energy(recHits[idx+offset].energy() < 0);
+        auto negative_energy_correction = (-1.0 * recHits[idx+offset].energy()) * is_negative_surr_energy;
 
-        
-        //auto calib_energy_to_sum = recHits[idx].energy() * is_surr_cell;
-        //auto negative_energy_correction = (-1.0 * recHits[idx+offset].energy()) * is_surr_cell * is_negative_surr_energy;
+        recHits[idx+offset].energy() += (negative_energy_correction + recHits[idx].energy());
 
-        //alpaka::atomicAdd(acc, &recHits[idx+offset].energy(), negative_energy_correction, alpaka::hierarchy::Blocks{});
-        //alpaka::atomicAdd(acc, &recHits[idx+offset].energy(), calib_energy_to_sum, alpaka::hierarchy::Blocks{});
+        //alpaka::atomicAdd(acc, &recHits[idx+offset].energy(), (-1.0 * recHits[idx+offset].energy()) * is_surr_cell * is_negative_surr_energy, alpaka::hierarchy::Blocks{});
+        //alpaka::atomicAdd(acc, &recHits[idx+offset].energy(), recHits[idx].energy() * is_surr_cell, alpaka::hierarchy::Blocks{});
 
-        alpaka::atomicAdd(acc, &recHits[idx+offset].energy(), (-1.0 * recHits[idx+offset].energy()) * is_surr_cell * is_negative_surr_energy, alpaka::hierarchy::Blocks{});
-        alpaka::atomicAdd(acc, &recHits[idx+offset].energy(), recHits[idx].energy() * is_surr_cell, alpaka::hierarchy::Blocks{});
-        
       }
     }
   };
